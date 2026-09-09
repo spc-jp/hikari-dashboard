@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>光製薬 サイト参謀ダッシュボード｜数字を読んで、次の一手まで</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --brand:#a8112a;--brand-deep:#7d0d20;--brand-soft:#fbe9ec;--brand-line:#f0cdd4;
+    --ink:#2a2320;--ink-soft:#6b6259;--paper:#f7f4f2;--card:#ffffff;--line:#ece5e0;
+    --up:#1f8a4c;--down:#c23b2e;--gold:#b0842f;
+    --shadow:0 1px 2px rgba(42,35,32,.05), 0 6px 20px rgba(42,35,32,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,Meiryo,sans-serif;
+    background:var(--paper);color:var(--ink);line-height:1.7;letter-spacing:.01em;display:flex;min-height:100vh}
+
+  /* サイドバー */
+  .side{width:210px;flex:0 0 210px;background:var(--brand);color:#fff;padding:26px 0;position:sticky;top:0;height:100vh}
+  .side .logo{padding:0 24px 22px;font-size:20px;font-weight:800;letter-spacing:.04em}
+  .side .logo small{display:block;font-size:11px;font-weight:500;opacity:.8;letter-spacing:.06em;margin-top:4px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:12px 24px;color:#fff;text-decoration:none;font-size:14px;opacity:.85;border-left:3px solid transparent;transition:.15s}
+  .nav a:hover{opacity:1;background:rgba(255,255,255,.08)}
+  .nav a.active{opacity:1;background:rgba(255,255,255,.12);border-left-color:#fff;font-weight:700}
+  .side .note{margin:24px;padding:14px;background:rgba(255,255,255,.10);border-radius:10px;font-size:11.5px;line-height:1.7;opacity:.9}
+
+  .main{flex:1;min-width:0;padding:24px 30px 60px}
+  .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .tabs{display:flex;gap:4px;background:var(--card);padding:5px;border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  .tab{appearance:none;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:700;color:var(--ink-soft);background:transparent;transition:.15s}
+  .tab:hover{color:var(--brand)}
+  .tab.active{background:var(--brand);color:#fff}
+  .period{font-size:12.5px;color:var(--ink-soft);margin-top:12px}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+  .kpi .plain{font-size:13px;color:var(--ink-soft);font-weight:700}
+  .kpi .num{font-size:29px;font-weight:800;margin:4px 0 3px;font-feature-settings:"tnum"}
+  .kpi .num .u{font-size:13px;color:var(--ink-soft);margin-left:3px;font-weight:700}
+  .kpi .delta{font-size:12px;font-weight:700}
+  .kpi .delta.up{color:var(--up)}.kpi .delta.down{color:var(--down)}
+  .kpi .term{font-size:11px;color:var(--gold);margin-top:9px;padding-top:8px;border-top:1px dotted var(--line)}
+
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .panel h3{font-size:16px;font-weight:800}
+  .panel .sub{font-size:12px;color:var(--ink-soft);margin:2px 0 16px}
+  .canvas-holder{position:relative;height:270px}
+  .canvas-holder.short{height:230px}
+
+  .dirs{margin-top:18px}
+  .dir{display:grid;grid-template-columns:110px 1fr 64px;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+  .dir .name{color:var(--ink-soft);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dir .track{background:var(--brand-soft);border-radius:6px;height:12px;overflow:hidden}
+  .dir .fill{background:var(--brand);height:100%;border-radius:6px}
+  .dir .val{text-align:right;font-weight:700;font-feature-settings:"tnum"}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:10px 8px;text-align:left;border-top:1px solid var(--line)}
+  th{color:var(--ink-soft);font-size:11.5px;font-weight:700}
+  td.n,th.n{text-align:right;font-feature-settings:"tnum"}
+  .rankchg.up{color:var(--up);font-weight:700}.rankchg.down{color:var(--down);font-weight:700}.rankchg.flat{color:var(--ink-soft)}
+
+  /* ===== 参謀パネル（目玉） ===== */
+  .strategist{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#fdf6f7);border:1px solid var(--brand-line);border-left:5px solid var(--brand);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
+  .strategist .head{display:flex;align-items:center;gap:11px;margin-bottom:6px;flex-wrap:wrap}
+  .strategist .avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);display:inline-flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+  .strategist .who{font-size:15px;font-weight:800}
+  .strategist .who small{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:600}
+
+  /* 状態バッジ */
+  .statebar{display:flex;align-items:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;font-size:13.5px;font-weight:800}
+  .badge.good{background:#e6f4ec;color:#1f8a4c}
+  .badge.leak{background:#fdeee9;color:#c25a2e}
+  .badge.thin{background:#fff4e0;color:#b0842f}
+  .badge.warn{background:#fbe9ec;color:#a8112a}
+  .badge .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+  .state-desc{font-size:13px;color:var(--ink-soft)}
+
+  /* 目的スイッチ */
+  .goal-switch{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
+  .goal{appearance:none;border:1.5px solid var(--brand-line);background:#fff;cursor:pointer;font-family:inherit;
+    padding:10px 18px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--ink-soft);transition:.15s;display:flex;align-items:center;gap:8px}
+  .goal:hover{border-color:var(--brand);color:var(--brand)}
+  .goal.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .goal-label{font-size:12px;color:var(--ink-soft);margin-bottom:2px}
+
+  /* 提案カード */
+  .advice{margin-top:16px}
+  .advice-title{font-size:14px;font-weight:800;color:var(--brand);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .steps{list-style:none;counter-reset:step}
+  .steps li{position:relative;counter-increment:step;padding:14px 16px 14px 52px;margin-bottom:11px;background:#fff;border:1px solid var(--brand-line);border-radius:12px;font-size:14px}
+  .steps li:last-child{margin-bottom:0}
+  .steps li::before{content:counter(step);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+  .steps li b{color:var(--brand-deep)}
+  .steps li .why{display:block;margin-top:5px;font-size:12.5px;color:var(--ink-soft)}
+
+  /* 3サイト俯瞰 */
+  .overview{grid-column:1 / -1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:16px}
+  .overview h3{font-size:16px;font-weight:800;margin-bottom:2px}
+  .ov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .ov{border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s}
+  .ov:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .ov .ov-name{font-size:13.5px;font-weight:800}
+  .ov .ov-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-block;margin-top:6px}
+  .ov .ov-line{font-size:12px;color:var(--ink-soft);margin-top:8px}
+
+  details.glossary{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  details.glossary summary{cursor:pointer;padding:15px 22px;font-weight:800;font-size:14.5px;list-style:none}
+  details.glossary summary::-webkit-details-marker{display:none}
+  details.glossary summary::after{content:"＋";float:right;color:var(--brand)}
+  details.glossary[open] summary::after{content:"−"}
+  .gtable th{color:var(--gold);width:44%}
+
+  .actions{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:10px;transition:.15s}
+  .btn-main{background:var(--brand);color:#fff}.btn-main:hover{background:var(--brand-deep)}
+  .btn-ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}.btn-ghost:hover{background:var(--brand-soft)}
+  footer{margin-top:34px;text-align:center;color:var(--ink-soft);font-size:12px}
+  footer .motto{color:var(--brand);font-weight:700}
+
+  @media(max-width:900px){
+    body{flex-direction:column}
+    .side{width:100%;height:auto;position:static;padding:16px 0;display:flex;flex-wrap:wrap;align-items:center}
+    .side .logo{padding:0 20px;flex:1}.nav{display:flex;flex-wrap:wrap}
+    .nav a{border-left:none;padding:8px 14px;font-size:13px}.side .note{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.ov-grid{grid-template-columns:1fr}
+  }
+  @media print{
+    .side,.actions,details.glossary,.tabs,.goal-switch{display:none!important}
+    body{background:#fff}.main{padding:0}
+    .panel,.kpi,.strategist,.overview{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+  <aside class="side">
+    <div class="logo">光製薬<small>SITE 参謀 DASHBOARD</small></div>
+    <nav class="nav">
+      <a class="active" href="#">🏠 ダッシュボード</a>
+      <a href="#">▦ ページ別に見る</a>
+      <a href="#">🔑 キーワード</a>
+      <a href="#">📄 月次レポート</a>
+    </nav>
+    <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-site="corp">コーポレートサイト</button>
+          <button class="tab" data-site="recruit">採用サイト</button>
+          <button class="tab" data-site="vision">ビジョンサイト</button>
+        </div>
+        <div class="period" id="period"></div>
+      </div>
+    </div>
+
+    <!-- 3サイト俯瞰 -->
+    <section class="overview">
+      <h3>3サイト、いまの状態をひと目で</h3>
+      <p class="sub" style="font-size:12px;color:var(--ink-soft);margin-top:2px">クリックすると、そのサイトの詳しい分析と提案に移ります。</p>
+      <div class="ov-grid" id="ovGrid"></div>
+    </section>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>サイト全体の動き</h3>
+        <p class="sub">来てくれた回数（実線）と、初めての方（点線）の移り変わりです。</p>
+        <div class="canvas-holder"><canvas id="chartTrend"></canvas></div>
+        <div class="dirs" id="dirs"></div>
+      </div>
+      <div class="panel">
+        <h3>よく読まれたページ</h3>
+        <p class="sub">直近1週間で、いちばん見られたページ 上位5つ。</p>
+        <div class="canvas-holder short"><canvas id="chartPages"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>検索で見つけてもらえた言葉</h3>
+        <p class="sub">お客さまがGoogleで打ち込んで、サイトが表示された言葉です。</p>
+        <table>
+          <thead><tr><th>検索された言葉</th><th class="n">位置</th><th class="n">先週から</th><th class="n">表示回数</th></tr></thead>
+          <tbody id="kwBody"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>どこから来たか</h3>
+        <p class="sub">お客さまがサイトにたどり着いた入口の内訳です。</p>
+        <div class="canvas-holder short"><canvas id="chartSource"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 参謀パネル -->
+    <div class="grid">
+      <div class="strategist">
+        <div class="head">
+          <span class="avatar">🧭</span>
+          <span class="who">サイト参謀の見立て<small>データを読んで、課題を探し、次の一手まで</small></span>
+        </div>
+
+        <div class="statebar">
+          <span id="stateBadge" class="badge good"><span class="dot"></span><span id="stateName"></span></span>
+          <span class="state-desc" id="stateDesc"></span>
+        </div>
+
+        <div class="goal-label">▼ 何を目的にしますか？（切り替えると提案が変わります）</div>
+        <div class="goal-switch" id="goalSwitch">
+          <button class="goal active" data-goal="cv">🎯 成果を増やす</button>
+          <button class="goal" data-goal="reach">📣 訪問・認知を広げる</button>
+          <button class="goal" data-goal="seo">🔍 検索対策を強くする</button>
+        </div>
+
+        <div class="advice">
+          <div class="advice-title" id="adviceTitle"></div>
+          <ol class="steps" id="steps"></ol>
+        </div>
+      </div>
+    </div>
+
+    <details class="glossary">
+      <summary>気になったら開く：専門用語の日本語やくわかり辞典</summary>
+      <table class="gtable"><tbody id="glossaryBody"></tbody></table>
+    </details>
+
+    <div class="actions">
+      <button class="btn btn-main" onclick="window.print()">この提案を印刷 / PDF保存</button>
+      <button class="btn btn-ghost" id="csvBtn">CSVを読み込む（次ステップで実装）</button>
+    </div>
+
+    <footer>
+      <p class="motto">考えるを、ひとりにしない。</p>
+      <p>Smile Plus Consulting ／ 光製薬さま サイト参謀ダッシュボード（サンプルデータ表示中）</p>
+    </footer>
+  </main>
+
+<script>
+/* ============================================================
+   データ（3サイト・架空サンプル）
+   ============================================================ */
+const DATA={
+  corp:{label:"コーポレートサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","27,850","回",6.7,"ページビュー"],["訪問された回数","13,020","回",5.8,"セッション"],["成果（問い合わせ等）","312","件",12.1,"コンバージョン"],["検索結果での平均位置","9.4","位",-0.6,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[18000,20500,21000,20200,23000,25500,26800,27850],trendNew:[9000,9200,9500,9300,10200,11500,12800,13200],
+    dirs:[["/blog/",12400],["/service/",8300],["/case-studies/",4100],["/price/",3050]],
+    pages:[["コンサル紹介",1560],["点滴ガイド記事",1280],["導入事例",990],["料金ページ",760],["SEO基礎記事",540]],
+    source:[["検索から来た人",7200],["直接アクセス",3100],["よそのサイト経由",1600],["SNS経由",1120]],
+    keywords:[["輸液ポンプ 選び方",3,2,8400],["輸液セット 種類",5,-1,6200],["経静脈輸液 とは",7,4,5100],["高カロリー輸液 メーカー",11,0,3300],["輸液療法 副作用",15,-3,2100]]},
+  recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[2600,2900,3100,3050,3400,3800,4000,4180],trendNew:[1900,2100,2250,2200,2500,2800,3050,3200],
+    dirs:[["/message/",3800],["/interview/",2600],["/jobs/",1900],["/culture/",1120]],
+    pages:[["社員インタビュー",1120],["募集要項",980],["代表メッセージ",720],["福利厚生",510],["1日の流れ",360]],
+    source:[["検索から来た人",1800],["SNS経由",1200],["直接アクセス",760],["よそのサイト経由",420]],
+    keywords:[["光製薬 採用",2,1,4200],["製薬 MR 未経験",8,5,3100],["光製薬 評判 社員",6,-2,2400],["製薬会社 働きやすい",14,3,1600],["光製薬 新卒",4,0,1350]]},
+  vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[2100,2200,2150,2050,2250,2300,2280,2340],trendNew:[1400,1450,1420,1380,1500,1520,1490,1530],
+    dirs:[["/vision/",2400],["/sustainability/",1600],["/rd/",980],["/history/",680]],
+    pages:[["企業ビジョン",860],["サステナビリティ",640],["研究開発",480],["沿革",320],["社会貢献",210]],
+    source:[["直接アクセス",980],["検索から来た人",760],["よそのサイト経由",380],["SNS経由",220]],
+    keywords:[["光製薬 企業理念",5,2,1800],["製薬 サステナビリティ",18,-4,1200],["光製薬 研究開発",9,1,960],["医薬品 社会貢献",22,6,640],["光製薬 歴史",7,0,520]]}
+};
+
+const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
+
+const FONT="'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif";
+let charts={};let current="corp";let currentGoal="cv";
+
+/* ============================================================
+   状態判定エンジン（訪問 × 成果）
+   ============================================================ */
+function judgeState(d){
+  const sess=d.kpi[1][3];   // 訪問の前週比%
+  const cv=d.kpi[2][3];     // 成果の前週比%
+  const up=v=>v>=0;
+  if(up(sess)&&up(cv))  return {key:"good", cls:"good", name:"好調",       desc:"訪問も成果も伸びています。勢いを他サイトへ広げる好機です。"};
+  if(up(sess)&&!up(cv)) return {key:"leak", cls:"leak", name:"取りこぼし", desc:"人は来ているのに、成果が落ちています。受け皿（着地ページ・申込み導線）に課題がありそうです。"};
+  if(!up(sess)&&up(cv)) return {key:"deep", cls:"thin", name:"濃いお客さん", desc:"訪問は減っていますが成果は堅調。質の高い層に届いています。入口の細りが心配です。"};
+  return {key:"warn", cls:"warn", name:"要注意",     desc:"訪問も成果も落ちています。まず入口（集客）の回復が最優先です。"};
+}
+
+/* ============================================================
+   提案エンジン：状態 × 目的 → ステップ
+   ============================================================ */
+function buildAdvice(d, state, goal){
+  const topPage=d.pages[0][0];
+  const topSrc=d.source[0][0];
+  const srcShare=Math.round(d.source[0][1]/d.source.reduce((a,b)=>a+b[1],0)*100);
+  // 上がったキーワード・下がったキーワード
+  const rising=d.keywords.filter(k=>k[2]>0).sort((a,b)=>b[2]-a[2])[0];
+  const falling=d.keywords.filter(k=>k[2]<0).sort((a,b)=>a[2]-b[2])[0];
+  const nearTop=d.keywords.filter(k=>k[1]>=4&&k[1]<=10).sort((a,b)=>b[3]-a[3])[0]; // あと一歩で上位
+
+  const S=(text,why)=>({text,why});
+  const A={cv:[],reach:[],seo:[]};
+
+  /* ---------- 目的：成果を増やす ---------- */
+  if(state.key==="good"){
+    A.cv=[
+      S(`いま最も読まれている<b>「${topPage}」</b>に、成果への案内（問い合わせ・申込みボタン）が置けているか確認しましょう。`,"読まれている今こそ、行動につなげる絶好のタイミングです。"),
+      S(`この好調な勝ちパターンを、<b>他の2サイトへ横展開</b>できないか検討しましょう。`,"1サイトで効いた型は、他でも効く可能性が高いです。"),
+      S(`成果につながった入口（<b>${topSrc}</b>）への発信を、もう一段増やしましょう。`,"うまくいっている流れは、止めずに伸ばすのが鉄則です。")
+    ];
+  }else if(state.key==="leak"){
+    A.cv=[
+      S(`最優先は<b>着地ページの見直し</b>です。人は来ているのに成果が落ちている＝受け皿に穴があります。`,"集客ではなく、来た人を逃さない工夫が先です。"),
+      S(`<b>「${topPage}」</b>の申込みボタンの位置・文言を見直しましょう。ページの下すぎる位置にないですか。`,"読まれているページの導線改善が、最も速く効きます。"),
+      S(`問い合わせフォームの入力項目を減らせないか確認を。項目が多いほど途中離脱が増えます。`,"成果直前の離脱は、フォームが原因のことが多いです。")
+    ];
+  }else if(state.key==="deep"){
+    A.cv=[
+      S(`少数でも成果が出ている＝<b>質の高い層</b>が来ています。この層がどの入口・どのページから来たかを深掘りしましょう。`,"勝ち筋が細く残っています。まずそれを特定します。"),
+      S(`成果を生んでいる<b>「${topPage}」</b>に似た内容を増やし、同じ層をもっと呼び込みましょう。`,"効いている型を増やすのが、確実な一手です。"),
+      S(`訪問が減った原因（次のSEO目的の提案も参照）を並行して手当てしましょう。`,"入口が細ると、いずれ成果も細ります。")
+    ];
+  }else{
+    A.cv=[
+      S(`成果を語る前に、まず<b>訪問の回復</b>が先です。入口が細っています。`,"人が来なければ、成果は生まれません。"),
+      S(`最後に成果が出ていた頃と今で、<b>何が変わったか</b>を洗い出しましょう（記事の停止・順位低下・SNS停滞など）。`,"原因の特定が、回復の第一歩です。"),
+      S(`当面は新規施策より、<b>止まっている入口の再稼働</b>に絞りましょう。`,"手を広げず、原因に集中するのが得策です。")
+    ];
+  }
+
+  /* ---------- 目的：訪問・認知を広げる ---------- */
+  const reachTopShare = srcShare>=55
+    ? S(`入口が<b>「${topSrc}」に約${srcShare}%も偏っています</b>。少ない入口を1つ育て、集客の柱を増やしましょう。`,"1本足打法はリスク。柱が増えるほど安定します。")
+    : S(`入口のバランスは悪くありません。いちばん伸びている<b>「${topSrc}」</b>をさらに太くしましょう。`,"伸びている流れに乗るのが効率的です。");
+  if(state.key==="good"){
+    A.reach=[
+      reachTopShare,
+      rising?S(`検索で伸びている<b>「${rising[0]}」</b>（先週より${rising[2]}上昇）の関連記事を増やし、この波を広げましょう。`,"伸び始めた言葉は、追い風が吹いています。"):S(`読まれているページをSNSで切り出して発信しましょう。`,"人気コンテンツは拡散の起点になります。"),
+      S(`勢いのある今こそ、普段リーチしない層へ<b>新しい入口（SNS・外部メディア）</b>を試す好機です。`,"調子が良い時ほど、次の種をまけます。")
+    ];
+  }else if(state.key==="leak"){
+    A.reach=[
+      S(`いまは<b>広げるより、受け皿を直す時期</b>です。集客は足りています（成果目的の提案を先に）。`,"穴の空いたバケツに水を足しても、たまりません。"),
+      reachTopShare,
+      S(`受け皿を整えてから、改めて入口拡大に進みましょう。`,"順番を守るほうが、最終的に成果が大きくなります。")
+    ];
+  }else{
+    A.reach=[
+      S(`訪問を回復させるため、まず<b>${topSrc}以外の入口</b>で止まっているものがないか点検しましょう。`,"減った入口の特定が最優先です。"),
+      reachTopShare,
+      rising?S(`検索で上昇中の<b>「${rising[0]}」</b>を軸に、関連発信を増やして流れを取り戻しましょう。`,"わずかな上昇の芽を、大きく育てます。"):S(`SNSと外部リンク、両方の入口を再点検しましょう。`,"入口全体の健康診断が必要な状態です。")
+    ];
+  }
+
+  /* ---------- 目的：検索対策(SEO) ---------- */
+  A.seo=[];
+  if(nearTop) A.seo.push(S(`<b>「${nearTop[0]}」は現在${nearTop[1]}位</b>。あと少しで上位表示です。この記事を優先的に加筆・更新しましょう。`,"5〜10位は、少しの改善で1ページ目上位に届きます。"));
+  if(falling) A.seo.push(S(`<b>「${falling[0]}」が先週より${Math.abs(falling[2])}下落</b>。競合が動いた可能性があります。内容の鮮度と網羅性を見直しましょう。`,"下落の放置は、さらなる順位低下を招きます。"));
+  if(rising)  A.seo.push(S(`<b>「${rising[0]}」が${rising[2]}上昇中</b>。伸びている今、関連する言葉でもう1本記事を作ると波及します。`,"上昇中の追い風を、記事数で受け止めます。"));
+  // 状態に応じた締め
+  if(state.key==="leak"){
+    A.seo.unshift(S(`検索順位より先に、<b>着地ページの中身</b>を見直すのが得策です。上位に来ても成果が出なければ意味が薄いためです。`,"今のこのサイトは、順位より中身が課題です。"));
+  }else if(state.key==="warn"){
+    A.seo.unshift(S(`<b>掲載順位が落ちた言葉</b>を全て洗い出し、記事の再編集から着手しましょう。`,"要注意の状態では、守り（順位維持）が先です。"));
+  }
+  if(A.seo.length<3) A.seo.push(S(`月に1度、キーワードの順位変動をこの画面で定点観測しましょう。`,"続けて見ることで、小さな変化に早く気づけます。"));
+  A.seo=A.seo.slice(0,3);
+
+  return A[goal];
+}
+
+const GOAL_TITLE={cv:"🎯 成果を増やすための、次の一手",reach:"📣 訪問・認知を広げるための、次の一手",seo:"🔍 検索対策を強くするための、次の一手"};
+
+/* ============================================================
+   描画
+   ============================================================ */
+function render(site){
+  const d=DATA[site];
+  document.getElementById("period").textContent="▼ "+d.period;
+
+  // KPI
+  document.getElementById("kpis").innerHTML=d.kpi.map(([plain,num,unit,delta,term])=>{
+    const isRank=term.includes("順位");
+    const good=isRank?(delta<=0):(delta>=0);
+    const sign=delta>=0?"+":"";
+    return `<div class="kpi"><div class="plain">${plain}</div>
+      <div class="num">${num}<span class="u">${unit}</span></div>
+      <div class="delta ${good?"up":"down"}">${sign}${delta}${isRank?"":"%"} 前週比</div>
+      <div class="term">GA4での呼び名：${term}</div></div>`;
+  }).join("");
+
+  // ディレクトリ
+  const maxDir=Math.max(...d.dirs.map(x=>x[1]));
+  document.getElementById("dirs").innerHTML=d.dirs.map(([name,val])=>`
+    <div class="dir"><span class="name">${name}</span>
+      <span class="track"><span class="fill" style="width:${val/maxDir*100}%"></span></span>
+      <span class="val">${val.toLocaleString()}</span></div>`).join("");
+
+  // キーワード
+  document.getElementById("kwBody").innerHTML=d.keywords.map(([kw,rank,chg,imp])=>{
+    const cls=chg>0?"up":chg<0?"down":"flat";
+    const t=chg===0?"変わらず":(chg>0?"▲":"▼")+Math.abs(chg);
+    return `<tr><td>${kw}</td><td class="n">${rank}位</td><td class="n rankchg ${cls}">${t}</td><td class="n">${imp.toLocaleString()}</td></tr>`;
+  }).join("");
+
+  drawTrend(d);drawPages(d);drawSource(d);
+  renderStrategist(d);
+  renderOverview();
+}
+
+function renderStrategist(d){
+  const state=judgeState(d);
+  const badge=document.getElementById("stateBadge");
+  badge.className="badge "+state.cls;
+  document.getElementById("stateName").textContent="いまの状態："+state.name;
+  document.getElementById("stateDesc").textContent=state.desc;
+  renderAdvice();
+}
+function renderAdvice(){
+  const d=DATA[current];const state=judgeState(d);
+  document.getElementById("adviceTitle").textContent=GOAL_TITLE[currentGoal];
+  const steps=buildAdvice(d,state,currentGoal);
+  document.getElementById("steps").innerHTML=steps.map(s=>`<li>${s.text}<span class="why">なぜ？ ${s.why}</span></li>`).join("");
+}
+
+function renderOverview(){
+  const html=Object.entries(DATA).map(([key,d])=>{
+    const st=judgeState(d);
+    const cvSign=d.kpi[2][3]>=0?"+":"";
+    return `<div class="ov" data-site="${key}">
+      <div class="ov-name">${d.label}</div>
+      <span class="ov-badge badge ${st.cls}" style="padding:3px 10px">${st.name}</span>
+      <div class="ov-line">訪問 ${d.kpi[1][3]>=0?"+":""}${d.kpi[1][3]}％ ／ 成果 ${cvSign}${d.kpi[2][3]}％</div>
+    </div>`;
+  }).join("");
+  document.getElementById("ovGrid").innerHTML=html;
+  document.querySelectorAll(".ov").forEach(el=>el.onclick=()=>{
+    const s=el.dataset.site;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.site===s));
+    current=s;render(s);
+    document.querySelector(".strategist").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+}
+
+/* グラフ */
+function destroy(k){if(charts[k])charts[k].destroy();}
+function drawTrend(d){destroy("t");charts.t=new Chart(document.getElementById("chartTrend"),{type:"line",
+  data:{labels:d.trendLabels,datasets:[
+    {label:"訪問回数",data:d.trendSessions,borderColor:"#a8112a",backgroundColor:"rgba(168,17,42,.08)",borderWidth:2.6,fill:true,tension:.35,pointRadius:3,pointBackgroundColor:"#a8112a"},
+    {label:"初めての方",data:d.trendNew,borderColor:"#c98a95",borderWidth:2,borderDash:[5,4],fill:false,tension:.35,pointRadius:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",align:"end",labels:{font:{family:FONT,size:12},boxWidth:14,padding:14}}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:11},color:"#6b6259"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}}}}});}
+function drawPages(d){destroy("p");charts.p=new Chart(document.getElementById("chartPages"),{type:"bar",
+  data:{labels:d.pages.map(x=>x[0]),datasets:[{data:d.pages.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:6,barThickness:16}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}}}}});}
+function drawSource(d){destroy("s");charts.s=new Chart(document.getElementById("chartSource"),{type:"doughnut",
+  data:{labels:d.source.map(x=>x[0]),datasets:[{data:d.source.map(x=>x[1]),backgroundColor:["#a8112a","#d98a95","#e0b3ba","#7d0d20","#c98a95"],borderColor:"#fff",borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
+
+/* 用語辞典 */
+document.getElementById("glossaryBody").innerHTML=GLOSSARY.map(([t,p])=>`<tr><th>${t}</th><td>${p}</td></tr>`).join("");
+
+/* イベント */
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab");if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  b.classList.add("active");current=b.dataset.site;render(current);
+});
+document.getElementById("goalSwitch").addEventListener("click",e=>{
+  const b=e.target.closest(".goal");if(!b)return;
+  document.querySelectorAll(".goal").forEach(g=>g.classList.remove("active"));
+  b.classList.add("active");currentGoal=b.dataset.goal;renderAdvice();
+});
+document.getElementById("csvBtn").onclick=()=>alert("実データCSVの読み込みは、由也さんのCSVを1枚いただければ次のステップで組み込みます😊\n列名に合わせて正確に実装します。");
+
+render("corp");
+</script>
+</body>
+</html>
