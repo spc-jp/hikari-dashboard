@@ -148,6 +148,16 @@
   .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
   @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
 
+  /* 社内アクセス表示 */
+  .internal-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .internal-fig{display:flex;align-items:baseline;gap:6px}
+  .internal-fig .big{font-size:38px;font-weight:800;color:var(--brand-deep);font-feature-settings:"tnum"}
+  .internal-fig .u{font-size:15px;color:var(--ink-soft);font-weight:700}
+  .internal-share{background:var(--brand-soft);border-radius:10px;padding:10px 16px;font-size:13.5px}
+  .internal-share b{font-size:20px;color:var(--accent);font-weight:800}
+  .internal-note{font-size:12px;color:var(--ink-soft);margin-top:12px;background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:10px 13px}
+  .internal-note b{color:var(--accent)}
+
   /* メニューで飛んだ先をふわっと強調 */
   @keyframes flashglow{
     0%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
@@ -175,6 +185,7 @@
       <a data-target="panelKw" href="#">🔑 キーワード</a>
       <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
       <a data-target="panelWho" href="#">📱 見ている人</a>
+      <a data-target="panelInternal" href="#">🏢 社内アクセス</a>
       <a data-target="panelReport" href="#">📄 月次レポート</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
@@ -291,7 +302,15 @@
       </div>
     </div>
 
-    <!-- あまり見られていないページ -->
+    <!-- 社内アクセス（除外分） -->
+    <div class="grid">
+      <div class="panel" id="panelInternal" style="grid-column:1 / -1">
+        <h3>社内からのアクセス（除外分）</h3>
+        <p class="sub">GA4で「お客さまの数字」から除いている、社内・関係者からのアクセス数です。数字が大きいほど、社内でよく見られていることを意味します。</p>
+        <div id="internalBox"></div>
+      </div>
+    </div>
+
     <div class="grid">
       <div class="panel" id="panelWorst" style="grid-column:1 / -1">
         <h3>あまり見られていないページ</h3>
@@ -367,7 +386,8 @@ const DATA={
     hours:[120,90,60,45,40,55,110,260,420,510,560,540,600,580,610,590,620,600,540,480,420,360,280,190],
     weekday:[["月",4200],["火",4600],["水",4800],["木",4500],["金",4300],["土",1900],["日",1700]],
     device:[["スマホ",58],["パソコン",36],["タブレット",6]],
-    region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]]},
+    region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]],
+    internal:{sessions:1180,note:"IPアドレス除外分（社内ネットワーク）"}},
   recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -381,7 +401,8 @@ const DATA={
     hours:[80,50,30,20,18,25,60,150,180,190,175,200,240,220,210,205,215,230,300,380,420,360,260,150],
     weekday:[["月",1400],["火",1500],["水",1550],["木",1480],["金",1420],["土",820],["日",760]],
     device:[["スマホ",74],["パソコン",22],["タブレット",4]],
-    region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]]},
+    region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]],
+    internal:{sessions:340,note:"IPアドレス除外分（社内ネットワーク）"}},
   vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -395,7 +416,8 @@ const DATA={
     hours:[60,45,30,22,20,28,55,120,160,175,180,170,190,185,180,175,170,165,150,140,120,100,85,70],
     weekday:[["月",1600],["火",1650],["水",1620],["木",1580],["金",1500],["土",680],["日",640]],
     device:[["パソコン",52],["スマホ",42],["タブレット",6]],
-    region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]]}
+    region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]],
+    internal:{sessions:520,note:"IPアドレス除外分（社内ネットワーク）"}}
 };
 
 const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
@@ -534,7 +556,7 @@ function render(site){
   }).join("");
 
   drawTrend(d);drawPages(d);drawSource(d);
-  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);
+  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);drawInternal(d);
   renderStrategist(d);
   renderOverview();
 }
@@ -617,6 +639,29 @@ function drawRegion(d){destroy("rg");charts.rg=new Chart(document.getElementById
 function drawWorst(d){
   const note=v=>v<50?"ほぼ見られていません":v<90?"見直し候補":"少なめ";
   document.getElementById("worstBody").innerHTML=d.worst.map(([p,v])=>`<tr><td>${p}</td><td class="n">${v}</td><td style="color:var(--ink-soft);font-size:12px">${note(v)}</td></tr>`).join("");
+}
+
+function drawInternal(d){
+  const box=document.getElementById("internalBox");
+  if(!d.internal||!d.internal.sessions){
+    box.innerHTML='<p style="color:var(--ink-soft);font-size:13.5px">社内アクセスのデータはまだ読み込まれていません。GA4で内部トラフィックを別枠で記録している場合、そのCSVを読み込むとここに表示されます。</p>';
+    return;
+  }
+  const inl=d.internal.sessions;
+  const pub=toNum(d.kpi[1][1].replace(/,/g,""))||0;  // 公開（お客様）訪問
+  const total=inl+pub;
+  const share=total>0?Math.round(inl/total*100):0;
+  let comment;
+  if(share>=15) comment=`社内アクセスが全体の約${share}%と高めです。社内でよく見られている一方、<b>社外のお客さまへの訴求はまだ伸ばす余地</b>があると読めます。`;
+  else if(share>=7) comment=`社内アクセスは全体の約${share}%。ごく一般的な範囲です。表の「お客さまの数字」は社内を除いているので、安心してご覧いただけます。`;
+  else comment=`社内アクセスは全体の約${share}%とわずか。表示している数字は、ほぼ純粋なお客さまの動きと考えて差し支えありません。`;
+
+  box.innerHTML=`
+    <div class="internal-wrap">
+      <div class="internal-fig"><span class="big">${inl.toLocaleString()}</span><span class="u">回（社内）</span></div>
+      <div class="internal-share">社内込みの全体で見ると、社内は<br><b>約${share}%</b> を占めます</div>
+    </div>
+    <div class="internal-note">${comment}<br><span style="color:var(--ink-soft)">${d.internal.note||""}</span></div>`;
 }
 
 /* 用語辞典 */
@@ -738,6 +783,19 @@ function ingestCSV(text){
   if(cKw>=0 && (cImp>=0||cPos>=0)){
     const arr=body.map(r=>[r[cKw], cPos>=0?Math.round(val(r,cPos)):0, 0, cImp>=0?val(r,cImp):0]).filter(x=>x[0]).slice(0,5);
     if(arr.length){ d.keywords=arr; return "検索キーワードを反映しました"; }
+  }
+  // 社内アクセス（内部トラフィック）レポート
+  const cInternal=col(["テスト データ フィルタ","内部トラフィック","internal","test data filter"]);
+  if(cInternal>=0){
+    const vc=numCol(cInternal,["セッション","session","ユーザー","user"]);
+    let inl=0;
+    body.forEach(r=>{
+      const label=(r[cInternal]||"").toLowerCase();
+      if(label.includes("internal")||label.includes("内部")||label.includes("社内")){
+        inl+=vc>=0?val(r,vc):0;
+      }
+    });
+    if(inl>0){ d.internal={sessions:inl,note:"CSVから読み込んだ内部トラフィック分"}; return "社内アクセス（除外分）を反映しました"; }
   }
   // 日別/月別の推移レポート
   if(cDate>=0 && (cViews>=0||cSess>=0)){
