@@ -3,166 +3,807 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GA4 CSV書き出し手順書｜光製薬ダッシュボード用</title>
+<title>光製薬 サイト参謀ダッシュボード｜数字を読んで、次の一手まで</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --brand:#689ED5;--brand-deep:#3f6fa0;--brand-soft:#eaf3fa;--brand-line:#c3ddef;
     --accent:#c8102e;--accent-deep:#a50d26;--accent-soft:#fdeef0;
-    --ink:#22303a;--ink-soft:#5a6b78;--paper:#eef6fb;--card:#ffffff;--line:#c9dfec;
-    --shadow:0 1px 2px rgba(34,48,58,.05),0 6px 20px rgba(34,48,58,.08);
+    --ink:#22303a;--ink-soft:#5a6b78;--paper:#eef6fb;--card:#DCEDF4;--line:#c9dfec;
+    --up:#1f8a4c;--down:#c23b2e;--gold:#b0842f;
+    --shadow:0 1px 2px rgba(34,48,58,.05), 0 6px 20px rgba(34,48,58,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
   body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,Meiryo,sans-serif;
-    background:var(--paper);color:var(--ink);line-height:1.8;letter-spacing:.01em;padding:24px}
-  .sheet{max-width:820px;margin:0 auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+    background:var(--paper);color:var(--ink);line-height:1.7;letter-spacing:.01em;display:flex;min-height:100vh}
 
-  header{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;padding:32px 34px}
-  header .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:5px 13px;border-radius:999px;letter-spacing:.06em;margin-bottom:12px}
-  header h1{font-size:24px;font-weight:800;line-height:1.4}
-  header p{font-size:14px;margin-top:8px;opacity:.95}
+  /* サイドバー（実物サイト風：白背景・青文字・赤ワンポイント） */
+  .side{width:210px;flex:0 0 210px;background:#ffffff;color:var(--ink);padding:26px 0;position:sticky;top:0;height:100vh;border-right:1px solid var(--line)}
+  .side .logo{padding:0 24px 22px;font-size:20px;font-weight:800;letter-spacing:.04em;color:var(--accent)}
+  .side .logo small{display:block;font-size:11px;font-weight:600;color:var(--brand-deep);letter-spacing:.06em;margin-top:4px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:12px 24px;color:var(--ink-soft);text-decoration:none;font-size:14px;border-left:3px solid transparent;transition:.15s}
+  .nav a:hover{color:var(--brand-deep);background:var(--brand-soft)}
+  .nav a.active{color:var(--brand-deep);background:var(--brand-soft);border-left-color:var(--accent);font-weight:700}
+  .side .note{margin:24px;padding:14px;background:var(--brand-soft);border-radius:10px;font-size:11.5px;line-height:1.7;color:var(--ink-soft)}
 
-  .body{padding:28px 34px 34px}
-  .intro{background:var(--brand-soft);border-left:4px solid var(--brand);border-radius:10px;padding:16px 18px;font-size:13.5px;margin-bottom:24px}
-  .intro b{color:var(--brand-deep)}
+  .main{flex:1;min-width:0;padding:24px 30px 60px}
+  .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .tabs{display:flex;gap:4px;background:var(--card);padding:5px;border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  .tab{appearance:none;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:700;color:var(--ink-soft);background:transparent;transition:.15s}
+  .tab:hover{color:var(--brand)}
+  .tab.active{background:var(--brand-deep);color:#fff}
+  .period{font-size:12.5px;color:var(--ink-soft);margin-top:12px}
 
-  .commonbox{border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:26px}
-  .commonbox h2{font-size:16px;color:var(--brand-deep);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-  .commonbox h2::before{content:"共通";font-size:11px;background:var(--brand);color:#fff;padding:3px 9px;border-radius:6px}
-  .steplist{list-style:none;counter-reset:cs}
-  .steplist li{counter-increment:cs;position:relative;padding:8px 0 8px 40px;font-size:14px;border-bottom:1px dashed var(--line)}
-  .steplist li:last-child{border-bottom:none}
-  .steplist li::before{content:counter(cs);position:absolute;left:0;top:8px;width:26px;height:26px;background:var(--brand);color:#fff;border-radius:50%;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
-  .steplist b{color:var(--accent)}
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+  .kpi .plain{font-size:13px;color:var(--ink-soft);font-weight:700}
+  .kpi .num{font-size:29px;font-weight:800;margin:4px 0 3px;font-feature-settings:"tnum"}
+  .kpi .num .u{font-size:13px;color:var(--ink-soft);margin-left:3px;font-weight:700}
+  .kpi .delta{font-size:12px;font-weight:700}
+  .kpi .delta.up{color:var(--up)}.kpi .delta.down{color:var(--down)}
+  .kpi .term{font-size:11px;color:var(--gold);margin-top:9px;padding-top:8px;border-top:1px dotted var(--line)}
 
-  .csvcard{border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden}
-  .csvcard .ttl{background:var(--brand-soft);padding:13px 18px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:10px}
-  .csvcard .ttl .no{width:28px;height:28px;background:var(--accent);color:#fff;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
-  .csvcard .ttl .fills{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--brand-deep);background:#fff;border:1px solid var(--brand-line);padding:3px 10px;border-radius:999px}
-  .csvcard .inner{padding:14px 18px}
-  .path{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
-  .path .arrow{color:var(--accent);font-weight:700;margin:0 4px}
-  .check{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;padding:5px 0}
-  .check .box{width:18px;height:18px;border:2px solid var(--brand);border-radius:4px;flex:0 0 auto;margin-top:3px}
-  .note-mini{font-size:12px;color:var(--ink-soft);background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:10px}
-  .note-mini b{color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:16px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow)}
+  .panel h3{font-size:16px;font-weight:800}
+  .panel .sub{font-size:12px;color:var(--ink-soft);margin:2px 0 16px}
+  .canvas-holder{position:relative;height:270px}
+  .canvas-holder.short{height:230px}
 
-  .warn{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:13.5px;margin:24px 0 8px}
-  .warn b{color:var(--accent)}
+  .dirs{margin-top:18px}
+  .dir{display:grid;grid-template-columns:110px 1fr 64px;align-items:center;gap:10px;margin-bottom:9px;font-size:12.5px}
+  .dir .name{color:var(--ink-soft);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dir .track{background:var(--brand-soft);border-radius:6px;height:12px;overflow:hidden}
+  .dir .fill{background:var(--brand);height:100%;border-radius:6px}
+  .dir .val{text-align:right;font-weight:700;font-feature-settings:"tnum"}
 
-  .checklist-final{border:2px solid var(--brand);border-radius:12px;padding:18px 20px;margin-top:24px}
-  .checklist-final h2{font-size:15px;color:var(--brand-deep);margin-bottom:12px}
-  .fin{display:flex;align-items:center;gap:10px;font-size:14px;padding:6px 0}
-  .fin .box{width:20px;height:20px;border:2px solid var(--accent);border-radius:5px;flex:0 0 auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:10px 8px;text-align:left;border-top:1px solid var(--line)}
+  th{color:var(--ink-soft);font-size:11.5px;font-weight:700}
+  td.n,th.n{text-align:right;font-feature-settings:"tnum"}
+  .rankchg.up{color:var(--up);font-weight:700}.rankchg.down{color:var(--down);font-weight:700}.rankchg.flat{color:var(--ink-soft)}
 
-  footer{text-align:center;font-size:12px;color:var(--ink-soft);padding:22px}
-  footer .motto{color:var(--brand-deep);font-weight:700}
+  /* ===== 参謀パネル（目玉） ===== */
+  .strategist{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#f4f9fd);border:1px solid var(--brand-line);border-left:5px solid var(--accent);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
+  .strategist .head{display:flex;align-items:center;gap:11px;margin-bottom:6px;flex-wrap:wrap}
+  .strategist .avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);display:inline-flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+  .strategist .who{font-size:15px;font-weight:800}
+  .strategist .who small{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:600}
+
+  /* 状態バッジ */
+  .statebar{display:flex;align-items:center;gap:10px;margin:14px 0 4px;flex-wrap:wrap}
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;font-size:13.5px;font-weight:800}
+  .badge.good{background:#e6f4ec;color:#1f8a4c}
+  .badge.leak{background:#fdeee9;color:#c25a2e}
+  .badge.thin{background:#fff4e0;color:#b0842f}
+  .badge.warn{background:var(--accent-soft);color:var(--accent)}
+  .badge .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+  .state-desc{font-size:13px;color:var(--ink-soft)}
+
+  /* 目的スイッチ */
+  .goal-switch{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
+  .goal{appearance:none;border:1.5px solid var(--brand-line);background:#fff;cursor:pointer;font-family:inherit;
+    padding:10px 18px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--ink-soft);transition:.15s;display:flex;align-items:center;gap:8px}
+  .goal:hover{border-color:var(--brand);color:var(--brand)}
+  .goal.active{background:var(--brand-deep);border-color:var(--brand-deep);color:#fff}
+  .goal-label{font-size:12px;color:var(--ink-soft);margin-bottom:2px}
+
+  /* 提案カード */
+  .advice{margin-top:16px}
+  .advice-title{font-size:14px;font-weight:800;color:var(--brand);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .steps{list-style:none;counter-reset:step}
+  .steps li{position:relative;counter-increment:step;padding:14px 16px 14px 52px;margin-bottom:11px;background:#fff;border:1px solid var(--brand-line);border-radius:12px;font-size:14px}
+  .steps li:last-child{margin-bottom:0}
+  .steps li::before{content:counter(step);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+  .steps li b{color:var(--brand-deep)}
+  .steps li .why{display:block;margin-top:5px;font-size:12.5px;color:var(--ink-soft)}
+
+  /* 3サイト俯瞰 */
+  .overview{grid-column:1 / -1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:16px}
+  .overview h3{font-size:16px;font-weight:800;margin-bottom:2px}
+  .ov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+  .ov{border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.15s}
+  .ov:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .ov .ov-name{font-size:13.5px;font-weight:800}
+  .ov .ov-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-block;margin-top:6px}
+  .ov .ov-line{font-size:12px;color:var(--ink-soft);margin-top:8px}
+
+  details.glossary{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  details.glossary summary{cursor:pointer;padding:15px 22px;font-weight:800;font-size:14.5px;list-style:none}
+  details.glossary summary::-webkit-details-marker{display:none}
+  details.glossary summary::after{content:"＋";float:right;color:var(--brand)}
+  details.glossary[open] summary::after{content:"−"}
+  .gtable th{color:var(--gold);width:44%}
+
+  .actions{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:10px;transition:.15s}
+  .btn-main{background:var(--brand);color:#fff}.btn-main:hover{background:var(--brand-deep)}
+  .btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:var(--accent-deep)}
+  .btn-ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}.btn-ghost:hover{background:var(--brand-soft)}
+  footer{margin-top:34px;text-align:center;color:var(--ink-soft);font-size:12px}
+  footer .motto{color:var(--brand);font-weight:700}
+
+  @media(max-width:900px){
+    body{flex-direction:column}
+    .side{width:100%;height:auto;position:static;padding:16px 0;display:flex;flex-wrap:wrap;align-items:center;border-right:none;border-bottom:1px solid var(--line)}
+    .side .logo{padding:0 20px;flex:1}.nav{display:flex;flex-wrap:wrap}
+    .nav a{border-left:none;padding:8px 14px;font-size:13px}.side .note{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.ov-grid{grid-template-columns:1fr}
+  }
+  /* 提案用カバー */
+  .cover{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;border-radius:18px;padding:44px 40px;margin-bottom:22px;box-shadow:var(--shadow)}
+  .cover-tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;background:var(--accent);color:#fff;padding:6px 14px;border-radius:999px;margin-bottom:16px}
+  .cover-title{font-size:32px;font-weight:800;letter-spacing:.02em;line-height:1.35}
+  .cover-sub{margin-top:12px;font-size:15px;line-height:1.9;opacity:.95}
+  .cover-sites{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+  .cover-sites span{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:8px 16px;border-radius:10px;font-size:13.5px;font-weight:700}
+  .cover-how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 20px}
+  .how-item{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6}
+  .how-item b{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:13px;margin-right:8px}
+  .cover-note{background:rgba(0,0,0,.15);border-radius:10px;padding:13px 16px;font-size:12px;line-height:1.8;opacity:.95}
+  .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
+  @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
+
+  /* メニューで飛んだ先をふわっと強調 */
+  @keyframes flashglow{
+    0%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
+    25%{box-shadow:0 0 0 4px rgba(104,158,213,.35)}
+    100%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
+  }
+  .flash{animation:flashglow 1.4s ease-out}
 
   @media print{
-    body{background:#fff;padding:0}
-    .sheet{box-shadow:none;border-radius:0}
-    .csvcard,.commonbox,.checklist-final{break-inside:avoid}
-    header{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .side,.actions,details.glossary,.tabs,.goal-switch{display:none!important}
+    .cover{break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .cover-title{color:#fff}
+    body{background:#fff}.main{padding:0}
+    .panel,.kpi,.strategist,.overview{box-shadow:none;break-inside:avoid}
   }
 </style>
 </head>
 <body>
-<div class="sheet">
-  <header>
-    <span class="tag">光製薬ダッシュボード用</span>
-    <h1>GA4から「CSV」を書き出す手順書</h1>
-    <p>この5枚を書き出して、ダッシュボードに読み込むだけ。難しい設定は要りません。</p>
-  </header>
 
-  <div class="body">
-    <div class="intro">
-      このシートは、GA4の画面から必要なデータを<b>CSVファイル</b>として保存するための手順です。<br>
-      書き出したCSVを、ダッシュボードの「GA4のCSVを読み込む」ボタンから入れれば、実際の数字に置き換わります。<br>
-      3サイト（コーポレート・採用・ビジョン）それぞれで、同じ作業をくり返してください。
-    </div>
+  <aside class="side">
+    <div class="logo">光製薬<small>SITE 参謀 DASHBOARD</small></div>
+    <nav class="nav">
+      <a class="active" data-target="top" href="#">🏠 ダッシュボード</a>
+      <a data-target="panelPages" href="#">▦ ページ別に見る</a>
+      <a data-target="panelKw" href="#">🔑 キーワード</a>
+      <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
+      <a data-target="panelWho" href="#">📱 見ている人</a>
+      <a data-target="panelReport" href="#">📄 月次レポート</a>
+    </nav>
+    <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
+  </aside>
 
-    <!-- 共通操作 -->
-    <div class="commonbox">
-      <h2>まず、どのCSVでも共通の書き出し方</h2>
-      <ol class="steplist">
-        <li>GA4にログインし、画面左上で<b>対象のサイト（プロパティ）</b>を選ぶ</li>
-        <li>見たいレポートを開く（次ページの5種類）</li>
-        <li>画面右上の<b>共有アイコン（↑のマーク）</b>を押す</li>
-        <li><b>「ファイルをダウンロード」</b>を選ぶ</li>
-        <li>形式で<b>「CSV」</b>を選んで保存する</li>
-      </ol>
-      <div class="note-mini">
-        ※ 期間は画面右上の日付欄で変えられます。まずは<b>「過去28日間」</b>や<b>「先月」</b>で書き出すのがおすすめです。
+  <main class="main">
+
+    <!-- 提案用カバー（印刷時は1ページ目） -->
+    <section class="cover" id="cover">
+      <div class="cover-inner">
+        <div class="cover-tag">光製薬さま ご提案資料</div>
+        <h1 class="cover-title">3サイト分析ダッシュボード</h1>
+        <p class="cover-sub">むずかしい専門用語を使わずに、サイトの数字を読み、<br>課題を見つけ、目的に応じた「次の一手」までご提案します。</p>
+        <div class="cover-sites">
+          <span>コーポレートサイト</span><span>採用サイト</span><span>ビジョンサイト</span>
+        </div>
+        <div class="cover-how">
+          <div class="how-item"><b>1</b>上のタブで、3つのサイトを切り替え</div>
+          <div class="how-item"><b>2</b>数字はすべて、やさしい言葉に翻訳ずみ</div>
+          <div class="how-item"><b>3</b>画面下で、目的に応じた改善案をご提案</div>
+        </div>
+        <div class="cover-note">
+          ※ この画面は現在、動作イメージ用のサンプル数値を表示しています。<br>
+          実際のGA4データ（CSV）を読み込むと、本物の数字に置き換わります。
+        </div>
+        <div class="cover-foot">Smile Plus Consulting ／ 考えるを、ひとりにしない。</div>
+      </div>
+    </section>
+
+    <div class="topbar">
+      <div>
+        <div class="tabs" id="tabs">
+          <button class="tab active" data-site="corp">コーポレートサイト</button>
+          <button class="tab" data-site="recruit">採用サイト</button>
+          <button class="tab" data-site="vision">ビジョンサイト</button>
+        </div>
+        <div class="period" id="period"></div>
       </div>
     </div>
 
-    <!-- 5種類 -->
-    <div class="csvcard">
-      <div class="ttl"><span class="no">1</span>ページ別データ<span class="fills">→ よく見られたページ／あまり見られていないページ</span></div>
-      <div class="inner">
-        <div class="path">レポート <span class="arrow">▶</span> エンゲージメント <span class="arrow">▶</span> ページとスクリーン</div>
-        <div class="check"><span class="box"></span><span>この画面を開いて、そのままCSVで書き出す</span></div>
-        <div class="note-mini">表の見出しに<b>「ページ パス」「表示回数」</b>が入っていればOKです。</div>
+    <!-- 3サイト俯瞰 -->
+    <section class="overview">
+      <h3>3サイト、いまの状態をひと目で</h3>
+      <p class="sub" style="font-size:12px;color:var(--ink-soft);margin-top:2px">クリックすると、そのサイトの詳しい分析と提案に移ります。</p>
+      <div class="ov-grid" id="ovGrid"></div>
+    </section>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>サイト全体の動き</h3>
+        <p class="sub">来てくれた回数（実線）と、初めての方（点線）の移り変わりです。</p>
+        <div class="canvas-holder"><canvas id="chartTrend"></canvas></div>
+        <div class="dirs" id="dirs"></div>
+      </div>
+      <div class="panel" id="panelPages">
+        <h3>よく読まれたページ</h3>
+        <p class="sub">直近1週間で、いちばん見られたページ 上位5つ。</p>
+        <div class="canvas-holder short"><canvas id="chartPages"></canvas></div>
       </div>
     </div>
 
-    <div class="csvcard">
-      <div class="ttl"><span class="no">2</span>流入元データ<span class="fills">→ どこから来たか（円グラフ）</span></div>
-      <div class="inner">
-        <div class="path">レポート <span class="arrow">▶</span> 集客 <span class="arrow">▶</span> トラフィック獲得</div>
-        <div class="check"><span class="box"></span><span>この画面を開いて、そのままCSVで書き出す</span></div>
-        <div class="note-mini">見出しに<b>「チャネル グループ」「セッション」</b>が入っていればOKです。</div>
+    <div class="grid">
+      <div class="panel" id="panelKw">
+        <h3>検索で見つけてもらえた言葉</h3>
+        <p class="sub">お客さまがGoogleで打ち込んで、サイトが表示された言葉です。</p>
+        <table>
+          <thead><tr><th>検索された言葉</th><th class="n">位置</th><th class="n">先週から</th><th class="n">表示回数</th></tr></thead>
+          <tbody id="kwBody"></tbody>
+        </table>
+      </div>
+      <div class="panel" id="panelSource">
+        <h3>どこから来たか</h3>
+        <p class="sub">お客さまがサイトにたどり着いた入口の内訳です。</p>
+        <div class="canvas-holder short"><canvas id="chartSource"></canvas></div>
       </div>
     </div>
 
-    <div class="csvcard">
-      <div class="ttl"><span class="no">3</span>デバイスデータ<span class="fills">→ スマホで見ている人の割合</span></div>
-      <div class="inner">
-        <div class="path">レポート <span class="arrow">▶</span> ユーザー <span class="arrow">▶</span> テクノロジー <span class="arrow">▶</span> ユーザーの環境の詳細</div>
-        <div class="check"><span class="box"></span><span>「デバイス カテゴリ」の表を表示して、CSVで書き出す</span></div>
-        <div class="note-mini">見出しに<b>「デバイス カテゴリ」</b>が入っていればOKです。mobile／desktop／tablet が並びます。</div>
+    <!-- 月別推移 -->
+    <div class="grid">
+      <div class="panel" id="panelMonthly" style="grid-column:1 / -1">
+        <h3>月ごとの移り変わり</h3>
+        <p class="sub">ページが見られた回数を、月単位でならべたものです。長い目での伸びが分かります。</p>
+        <div class="canvas-holder short"><canvas id="chartMonthly"></canvas></div>
       </div>
     </div>
 
-    <div class="csvcard">
-      <div class="ttl"><span class="no">4</span>地域データ<span class="fills">→ どの地域から見ているか（参考）</span></div>
-      <div class="inner">
-        <div class="path">レポート <span class="arrow">▶</span> ユーザー <span class="arrow">▶</span> ユーザー属性 <span class="arrow">▶</span> ユーザー属性の詳細</div>
-        <div class="check"><span class="box"></span><span>「国」または「市区町村」の表にして、CSVで書き出す</span></div>
-        <div class="note-mini"><b>ご注意：</b>会社からのアクセスは、実際の場所ではなく通信会社の所在地（東京など）に集まりがちです。地域データは<b>参考程度</b>とお考えください。</div>
+    <!-- 時間帯・曜日 -->
+    <div class="grid" id="panelTime">
+      <div class="panel">
+        <h3>よく見られる時間帯</h3>
+        <p class="sub">1日のうち、どの時間に見られているか（0時〜23時）。発信のベストタイミングが見えます。</p>
+        <div class="canvas-holder short"><canvas id="chartHours"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>よく見られる曜日</h3>
+        <p class="sub">1週間のうち、どの曜日に見られているかです。</p>
+        <div class="canvas-holder short"><canvas id="chartWeekday"></canvas></div>
       </div>
     </div>
 
-    <div class="csvcard">
-      <div class="ttl"><span class="no">5</span>検索キーワード<span class="fills">→ 検索で見つけてもらえた言葉</span></div>
-      <div class="inner">
-        <div class="path">レポート <span class="arrow">▶</span> Search Console <span class="arrow">▶</span> クエリ</div>
-        <div class="check"><span class="box"></span><span>この画面を開いて、そのままCSVで書き出す</span></div>
-        <div class="note-mini"><b>ご注意：</b>この項目は<b>サーチコンソール連携</b>が済んでいる場合のみ表示されます。メニューに「Search Console」が無ければ、この1枚は後回しでOKです。</div>
+    <!-- デバイス・地域 -->
+    <div class="grid" id="panelWho">
+      <div class="panel">
+        <h3>スマホで見ている人の割合</h3>
+        <p class="sub">どの機器で見られているか。スマホ中心なら、スマホでの見やすさが最優先です。</p>
+        <div class="canvas-holder short"><canvas id="chartDevice"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>どの地域から見ているか</h3>
+        <p class="sub">お客さまがアクセスしている地域の内訳です。</p>
+        <div class="canvas-holder short"><canvas id="chartRegion"></canvas></div>
       </div>
     </div>
 
-    <!-- 注意 -->
-    <div class="warn">
-      <b>大事な前提：</b>この作業でデータが出るのは、そのサイトに<b>GA4の計測タグが入っている</b>場合だけです。
-      採用・ビジョンの各サイト（.net）にタグが入っているか、先に確認してください。入っていないサイトは、書き出しても中身が空になります。
+    <!-- あまり見られていないページ -->
+    <div class="grid">
+      <div class="panel" id="panelWorst" style="grid-column:1 / -1">
+        <h3>あまり見られていないページ</h3>
+        <p class="sub">見られた回数が少ないページ 下位5つ。埋もれている情報や、見直しの候補です。</p>
+        <table>
+          <thead><tr><th>ページ</th><th class="n">見られた回数</th><th>ひとこと</th></tr></thead>
+          <tbody id="worstBody"></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- 最終チェック -->
-    <div class="checklist-final">
-      <h2>✓ 書き出しチェック（3サイト分くり返す）</h2>
-      <div class="fin"><span class="box"></span>1. ページ別データ を書き出した</div>
-      <div class="fin"><span class="box"></span>2. 流入元データ を書き出した</div>
-      <div class="fin"><span class="box"></span>3. デバイスデータ を書き出した</div>
-      <div class="fin"><span class="box"></span>4. 地域データ を書き出した</div>
-      <div class="fin"><span class="box"></span>5. 検索キーワード を書き出した（連携ありの場合）</div>
-    </div>
-  </div>
+    <!-- 参謀パネル -->
+    <div class="grid">
+      <div class="strategist">
+        <div class="head">
+          <span class="avatar">🧭</span>
+          <span class="who">サイト参謀の見立て<small>データを読んで、課題を探し、次の一手まで</small></span>
+        </div>
 
-  <footer>
-    <p class="motto">考えるを、ひとりにしない。</p>
-    <p>Smile Plus Consulting ／ GA4 CSV書き出し手順書<br>
-    ※ GA4の画面はGoogleの仕様変更でメニュー名が変わることがあります。違っていたら教えてください。</p>
-  </footer>
-</div>
+        <div class="statebar">
+          <span id="stateBadge" class="badge good"><span class="dot"></span><span id="stateName"></span></span>
+          <span class="state-desc" id="stateDesc"></span>
+        </div>
+
+        <div class="goal-label">▼ 何を目的にしますか？（切り替えると提案が変わります）</div>
+        <div class="goal-switch" id="goalSwitch">
+          <button class="goal active" data-goal="cv">🎯 成果を増やす</button>
+          <button class="goal" data-goal="reach">📣 訪問・認知を広げる</button>
+          <button class="goal" data-goal="seo">🔍 検索対策を強くする</button>
+        </div>
+
+        <div class="advice">
+          <div class="advice-title" id="adviceTitle"></div>
+          <ol class="steps" id="steps"></ol>
+        </div>
+      </div>
+    </div>
+
+    <details class="glossary">
+      <summary>気になったら開く：専門用語の日本語やくわかり辞典</summary>
+      <table class="gtable"><tbody id="glossaryBody"></tbody></table>
+    </details>
+
+    <div class="actions" id="panelReport">
+      <button class="btn btn-accent" onclick="window.print()">この提案を印刷 / PDF保存</button>
+      <button class="btn btn-ghost" id="csvBtn">GA4のCSVを読み込む</button>
+      <input type="file" id="fileInput" accept=".csv" multiple style="display:none">
+      <button class="btn btn-ghost" id="resetBtn" style="display:none">サンプルに戻す</button>
+    </div>
+    <div id="csvStatus" style="margin-top:12px;font-size:13px;color:var(--ink-soft)"></div>
+
+    <footer>
+      <p class="motto">考えるを、ひとりにしない。</p>
+      <p>Smile Plus Consulting ／ 光製薬さま サイト参謀ダッシュボード（サンプルデータ表示中）</p>
+    </footer>
+  </main>
+
+<script>
+/* ============================================================
+   データ（3サイト・架空サンプル）
+   ============================================================ */
+const DATA={
+  corp:{label:"コーポレートサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","27,850","回",6.7,"ページビュー"],["訪問された回数","13,020","回",5.8,"セッション"],["成果（問い合わせ等）","312","件",12.1,"コンバージョン"],["検索結果での平均位置","9.4","位",-0.6,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[18000,20500,21000,20200,23000,25500,26800,27850],trendNew:[9000,9200,9500,9300,10200,11500,12800,13200],
+    dirs:[["/blog/",12400],["/service/",8300],["/case-studies/",4100],["/price/",3050]],
+    pages:[["コンサル紹介",1560],["点滴ガイド記事",1280],["導入事例",990],["料金ページ",760],["SEO基礎記事",540]],
+    source:[["検索から来た人",7200],["直接アクセス",3100],["よそのサイト経由",1600],["SNS経由",1120]],
+    keywords:[["輸液ポンプ 選び方",3,2,8400],["輸液セット 種類",5,-1,6200],["経静脈輸液 とは",7,4,5100],["高カロリー輸液 メーカー",11,0,3300],["輸液療法 副作用",15,-3,2100]],
+    monthly:[["6月",78000],["7月",82000],["8月",79000],["9月",91000],["10月",103000],["11月",112000]],
+    worst:[["採用要項(古)",42],["englishサイト",58],["プレスリリース2019",71],["サイトマップ",96],["個人情報方針",120]],
+    hours:[120,90,60,45,40,55,110,260,420,510,560,540,600,580,610,590,620,600,540,480,420,360,280,190],
+    weekday:[["月",4200],["火",4600],["水",4800],["木",4500],["金",4300],["土",1900],["日",1700]],
+    device:[["スマホ",58],["パソコン",36],["タブレット",6]],
+    region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]]},
+  recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[2600,2900,3100,3050,3400,3800,4000,4180],trendNew:[1900,2100,2250,2200,2500,2800,3050,3200],
+    dirs:[["/message/",3800],["/interview/",2600],["/jobs/",1900],["/culture/",1120]],
+    pages:[["社員インタビュー",1120],["募集要項",980],["代表メッセージ",720],["福利厚生",510],["1日の流れ",360]],
+    source:[["検索から来た人",1800],["SNS経由",1200],["直接アクセス",760],["よそのサイト経由",420]],
+    keywords:[["光製薬 採用",2,1,4200],["製薬 MR 未経験",8,5,3100],["光製薬 評判 社員",6,-2,2400],["製薬会社 働きやすい",14,3,1600],["光製薬 新卒",4,0,1350]],
+    monthly:[["6月",18000],["7月",19500],["8月",17000],["9月",24000],["10月",31000],["11月",38000]],
+    worst:[["よくある質問",22],["先輩の休日",35],["研修制度(詳細)",48],["数字で見る当社",63],["エントリー方法",88]],
+    hours:[80,50,30,20,18,25,60,150,180,190,175,200,240,220,210,205,215,230,300,380,420,360,260,150],
+    weekday:[["月",1400],["火",1500],["水",1550],["木",1480],["金",1420],["土",820],["日",760]],
+    device:[["スマホ",74],["パソコン",22],["タブレット",4]],
+    region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]]},
+  vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
+    kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
+    trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
+    trendSessions:[2100,2200,2150,2050,2250,2300,2280,2340],trendNew:[1400,1450,1420,1380,1500,1520,1490,1530],
+    dirs:[["/vision/",2400],["/sustainability/",1600],["/rd/",980],["/history/",680]],
+    pages:[["企業ビジョン",860],["サステナビリティ",640],["研究開発",480],["沿革",320],["社会貢献",210]],
+    source:[["直接アクセス",980],["検索から来た人",760],["よそのサイト経由",380],["SNS経由",220]],
+    keywords:[["光製薬 企業理念",5,2,1800],["製薬 サステナビリティ",18,-4,1200],["光製薬 研究開発",9,1,960],["医薬品 社会貢献",22,6,640],["光製薬 歴史",7,0,520]],
+    monthly:[["6月",14000],["7月",14500],["8月",13800],["9月",15200],["10月",15600],["11月",16200]],
+    worst:[["沿革(詳細年表)",18],["IR情報",29],["役員一覧",44],["環境方針PDF",67],["用語集",92]],
+    hours:[60,45,30,22,20,28,55,120,160,175,180,170,190,185,180,175,170,165,150,140,120,100,85,70],
+    weekday:[["月",1600],["火",1650],["水",1620],["木",1580],["金",1500],["土",680],["日",640]],
+    device:[["パソコン",52],["スマホ",42],["タブレット",6]],
+    region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]]}
+};
+
+const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
+
+const FONT="'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif";
+let charts={};let current="corp";let currentGoal="cv";
+
+/* ============================================================
+   状態判定エンジン（訪問 × 成果）
+   ============================================================ */
+function judgeState(d){
+  const sess=d.kpi[1][3];   // 訪問の前週比%
+  const cv=d.kpi[2][3];     // 成果の前週比%
+  const up=v=>v>=0;
+  if(up(sess)&&up(cv))  return {key:"good", cls:"good", name:"好調",       desc:"訪問も成果も伸びています。勢いを他サイトへ広げる好機です。"};
+  if(up(sess)&&!up(cv)) return {key:"leak", cls:"leak", name:"取りこぼし", desc:"人は来ているのに、成果が落ちています。受け皿（着地ページ・申込み導線）に課題がありそうです。"};
+  if(!up(sess)&&up(cv)) return {key:"deep", cls:"thin", name:"濃いお客さん", desc:"訪問は減っていますが成果は堅調。質の高い層に届いています。入口の細りが心配です。"};
+  return {key:"warn", cls:"warn", name:"要注意",     desc:"訪問も成果も落ちています。まず入口（集客）の回復が最優先です。"};
+}
+
+/* ============================================================
+   提案エンジン：状態 × 目的 → ステップ
+   ============================================================ */
+function buildAdvice(d, state, goal){
+  const topPage=d.pages[0][0];
+  const topSrc=d.source[0][0];
+  const srcShare=Math.round(d.source[0][1]/d.source.reduce((a,b)=>a+b[1],0)*100);
+  // 上がったキーワード・下がったキーワード
+  const rising=d.keywords.filter(k=>k[2]>0).sort((a,b)=>b[2]-a[2])[0];
+  const falling=d.keywords.filter(k=>k[2]<0).sort((a,b)=>a[2]-b[2])[0];
+  const nearTop=d.keywords.filter(k=>k[1]>=4&&k[1]<=10).sort((a,b)=>b[3]-a[3])[0]; // あと一歩で上位
+
+  const S=(text,why)=>({text,why});
+  const A={cv:[],reach:[],seo:[]};
+
+  /* ---------- 目的：成果を増やす ---------- */
+  if(state.key==="good"){
+    A.cv=[
+      S(`いま最も読まれている<b>「${topPage}」</b>に、成果への案内（問い合わせ・申込みボタン）が置けているか確認しましょう。`,"読まれている今こそ、行動につなげる絶好のタイミングです。"),
+      S(`この好調な勝ちパターンを、<b>他の2サイトへ横展開</b>できないか検討しましょう。`,"1サイトで効いた型は、他でも効く可能性が高いです。"),
+      S(`成果につながった入口（<b>${topSrc}</b>）への発信を、もう一段増やしましょう。`,"うまくいっている流れは、止めずに伸ばすのが鉄則です。")
+    ];
+  }else if(state.key==="leak"){
+    A.cv=[
+      S(`最優先は<b>着地ページの見直し</b>です。人は来ているのに成果が落ちている＝受け皿に穴があります。`,"集客ではなく、来た人を逃さない工夫が先です。"),
+      S(`<b>「${topPage}」</b>の申込みボタンの位置・文言を見直しましょう。ページの下すぎる位置にないですか。`,"読まれているページの導線改善が、最も速く効きます。"),
+      S(`問い合わせフォームの入力項目を減らせないか確認を。項目が多いほど途中離脱が増えます。`,"成果直前の離脱は、フォームが原因のことが多いです。")
+    ];
+  }else if(state.key==="deep"){
+    A.cv=[
+      S(`少数でも成果が出ている＝<b>質の高い層</b>が来ています。この層がどの入口・どのページから来たかを深掘りしましょう。`,"勝ち筋が細く残っています。まずそれを特定します。"),
+      S(`成果を生んでいる<b>「${topPage}」</b>に似た内容を増やし、同じ層をもっと呼び込みましょう。`,"効いている型を増やすのが、確実な一手です。"),
+      S(`訪問が減った原因（次のSEO目的の提案も参照）を並行して手当てしましょう。`,"入口が細ると、いずれ成果も細ります。")
+    ];
+  }else{
+    A.cv=[
+      S(`成果を語る前に、まず<b>訪問の回復</b>が先です。入口が細っています。`,"人が来なければ、成果は生まれません。"),
+      S(`最後に成果が出ていた頃と今で、<b>何が変わったか</b>を洗い出しましょう（記事の停止・順位低下・SNS停滞など）。`,"原因の特定が、回復の第一歩です。"),
+      S(`当面は新規施策より、<b>止まっている入口の再稼働</b>に絞りましょう。`,"手を広げず、原因に集中するのが得策です。")
+    ];
+  }
+
+  /* ---------- 目的：訪問・認知を広げる ---------- */
+  const reachTopShare = srcShare>=55
+    ? S(`入口が<b>「${topSrc}」に約${srcShare}%も偏っています</b>。少ない入口を1つ育て、集客の柱を増やしましょう。`,"1本足打法はリスク。柱が増えるほど安定します。")
+    : S(`入口のバランスは悪くありません。いちばん伸びている<b>「${topSrc}」</b>をさらに太くしましょう。`,"伸びている流れに乗るのが効率的です。");
+  if(state.key==="good"){
+    A.reach=[
+      reachTopShare,
+      rising?S(`検索で伸びている<b>「${rising[0]}」</b>（先週より${rising[2]}上昇）の関連記事を増やし、この波を広げましょう。`,"伸び始めた言葉は、追い風が吹いています。"):S(`読まれているページをSNSで切り出して発信しましょう。`,"人気コンテンツは拡散の起点になります。"),
+      S(`勢いのある今こそ、普段リーチしない層へ<b>新しい入口（SNS・外部メディア）</b>を試す好機です。`,"調子が良い時ほど、次の種をまけます。")
+    ];
+  }else if(state.key==="leak"){
+    A.reach=[
+      S(`いまは<b>広げるより、受け皿を直す時期</b>です。集客は足りています（成果目的の提案を先に）。`,"穴の空いたバケツに水を足しても、たまりません。"),
+      reachTopShare,
+      S(`受け皿を整えてから、改めて入口拡大に進みましょう。`,"順番を守るほうが、最終的に成果が大きくなります。")
+    ];
+  }else{
+    A.reach=[
+      S(`訪問を回復させるため、まず<b>${topSrc}以外の入口</b>で止まっているものがないか点検しましょう。`,"減った入口の特定が最優先です。"),
+      reachTopShare,
+      rising?S(`検索で上昇中の<b>「${rising[0]}」</b>を軸に、関連発信を増やして流れを取り戻しましょう。`,"わずかな上昇の芽を、大きく育てます。"):S(`SNSと外部リンク、両方の入口を再点検しましょう。`,"入口全体の健康診断が必要な状態です。")
+    ];
+  }
+
+  /* ---------- 目的：検索対策(SEO) ---------- */
+  A.seo=[];
+  if(nearTop) A.seo.push(S(`<b>「${nearTop[0]}」は現在${nearTop[1]}位</b>。あと少しで上位表示です。この記事を優先的に加筆・更新しましょう。`,"5〜10位は、少しの改善で1ページ目上位に届きます。"));
+  if(falling) A.seo.push(S(`<b>「${falling[0]}」が先週より${Math.abs(falling[2])}下落</b>。競合が動いた可能性があります。内容の鮮度と網羅性を見直しましょう。`,"下落の放置は、さらなる順位低下を招きます。"));
+  if(rising)  A.seo.push(S(`<b>「${rising[0]}」が${rising[2]}上昇中</b>。伸びている今、関連する言葉でもう1本記事を作ると波及します。`,"上昇中の追い風を、記事数で受け止めます。"));
+  // 状態に応じた締め
+  if(state.key==="leak"){
+    A.seo.unshift(S(`検索順位より先に、<b>着地ページの中身</b>を見直すのが得策です。上位に来ても成果が出なければ意味が薄いためです。`,"今のこのサイトは、順位より中身が課題です。"));
+  }else if(state.key==="warn"){
+    A.seo.unshift(S(`<b>掲載順位が落ちた言葉</b>を全て洗い出し、記事の再編集から着手しましょう。`,"要注意の状態では、守り（順位維持）が先です。"));
+  }
+  if(A.seo.length<3) A.seo.push(S(`月に1度、キーワードの順位変動をこの画面で定点観測しましょう。`,"続けて見ることで、小さな変化に早く気づけます。"));
+  A.seo=A.seo.slice(0,3);
+
+  return A[goal];
+}
+
+const GOAL_TITLE={cv:"🎯 成果を増やすための、次の一手",reach:"📣 訪問・認知を広げるための、次の一手",seo:"🔍 検索対策を強くするための、次の一手"};
+
+/* ============================================================
+   描画
+   ============================================================ */
+function render(site){
+  const d=DATA[site];
+  document.getElementById("period").textContent="▼ "+d.period;
+
+  // KPI
+  document.getElementById("kpis").innerHTML=d.kpi.map(([plain,num,unit,delta,term])=>{
+    const isRank=term.includes("順位");
+    const good=isRank?(delta<=0):(delta>=0);
+    const sign=delta>=0?"+":"";
+    return `<div class="kpi"><div class="plain">${plain}</div>
+      <div class="num">${num}<span class="u">${unit}</span></div>
+      <div class="delta ${good?"up":"down"}">${sign}${delta}${isRank?"":"%"} 前週比</div>
+      <div class="term">GA4での呼び名：${term}</div></div>`;
+  }).join("");
+
+  // ディレクトリ
+  const maxDir=Math.max(...d.dirs.map(x=>x[1]));
+  document.getElementById("dirs").innerHTML=d.dirs.map(([name,val])=>`
+    <div class="dir"><span class="name">${name}</span>
+      <span class="track"><span class="fill" style="width:${val/maxDir*100}%"></span></span>
+      <span class="val">${val.toLocaleString()}</span></div>`).join("");
+
+  // キーワード
+  document.getElementById("kwBody").innerHTML=d.keywords.map(([kw,rank,chg,imp])=>{
+    const cls=chg>0?"up":chg<0?"down":"flat";
+    const t=chg===0?"変わらず":(chg>0?"▲":"▼")+Math.abs(chg);
+    return `<tr><td>${kw}</td><td class="n">${rank}位</td><td class="n rankchg ${cls}">${t}</td><td class="n">${imp.toLocaleString()}</td></tr>`;
+  }).join("");
+
+  drawTrend(d);drawPages(d);drawSource(d);
+  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);
+  renderStrategist(d);
+  renderOverview();
+}
+
+function renderStrategist(d){
+  const state=judgeState(d);
+  const badge=document.getElementById("stateBadge");
+  badge.className="badge "+state.cls;
+  document.getElementById("stateName").textContent="いまの状態："+state.name;
+  document.getElementById("stateDesc").textContent=state.desc;
+  renderAdvice();
+}
+function renderAdvice(){
+  const d=DATA[current];const state=judgeState(d);
+  document.getElementById("adviceTitle").textContent=GOAL_TITLE[currentGoal];
+  const steps=buildAdvice(d,state,currentGoal);
+  document.getElementById("steps").innerHTML=steps.map(s=>`<li>${s.text}<span class="why">なぜ？ ${s.why}</span></li>`).join("");
+}
+
+function renderOverview(){
+  const html=Object.entries(DATA).map(([key,d])=>{
+    const st=judgeState(d);
+    const cvSign=d.kpi[2][3]>=0?"+":"";
+    return `<div class="ov" data-site="${key}">
+      <div class="ov-name">${d.label}</div>
+      <span class="ov-badge badge ${st.cls}" style="padding:3px 10px">${st.name}</span>
+      <div class="ov-line">訪問 ${d.kpi[1][3]>=0?"+":""}${d.kpi[1][3]}％ ／ 成果 ${cvSign}${d.kpi[2][3]}％</div>
+    </div>`;
+  }).join("");
+  document.getElementById("ovGrid").innerHTML=html;
+  document.querySelectorAll(".ov").forEach(el=>el.onclick=()=>{
+    const s=el.dataset.site;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.site===s));
+    current=s;render(s);
+    document.querySelector(".strategist").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+}
+
+/* グラフ */
+function destroy(k){if(charts[k])charts[k].destroy();}
+function drawTrend(d){destroy("t");charts.t=new Chart(document.getElementById("chartTrend"),{type:"line",
+  data:{labels:d.trendLabels,datasets:[
+    {label:"訪問回数",data:d.trendSessions,borderColor:"#689ED5",backgroundColor:"rgba(104,158,213,.08)",borderWidth:2.6,fill:true,tension:.35,pointRadius:3,pointBackgroundColor:"#689ED5"},
+    {label:"初めての方",data:d.trendNew,borderColor:"#a9c9e6",borderWidth:2,borderDash:[5,4],fill:false,tension:.35,pointRadius:0}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",align:"end",labels:{font:{family:FONT,size:12},boxWidth:14,padding:14}}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}}}}});}
+function drawPages(d){destroy("p");charts.p=new Chart(document.getElementById("chartPages"),{type:"bar",
+  data:{labels:d.pages.map(x=>x[0]),datasets:[{data:d.pages.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:6,barThickness:16}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}}}}});}
+function drawSource(d){destroy("s");charts.s=new Chart(document.getElementById("chartSource"),{type:"doughnut",
+  data:{labels:d.source.map(x=>x[0]),datasets:[{data:d.source.map(x=>x[1]),backgroundColor:["#689ED5","#9cc3e5","#c3ddef","#3f6fa0","#a9c9e6"],borderColor:"#fff",borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
+
+function drawMonthly(d){destroy("m");charts.m=new Chart(document.getElementById("chartMonthly"),{type:"bar",
+  data:{labels:d.monthly.map(x=>x[0]),datasets:[{data:d.monthly.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:6,barThickness:34}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}}}}});}
+
+function drawHours(d){destroy("h");const lbl=d.hours.map((_,i)=>i+"時");
+  charts.h=new Chart(document.getElementById("chartHours"),{type:"bar",
+  data:{labels:lbl,datasets:[{data:d.hours,backgroundColor:d.hours.map(v=>v>=Math.max(...d.hours)*0.8?"#689ED5":"#c3ddef"),borderRadius:3}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>c[0].label+"台"}}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:9},color:"#5a6b78",maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}}}}});}
+
+function drawWeekday(d){destroy("w");charts.w=new Chart(document.getElementById("chartWeekday"),{type:"bar",
+  data:{labels:d.weekday.map(x=>x[0]),datasets:[{data:d.weekday.map(x=>x[1]),backgroundColor:d.weekday.map((x,i)=>i>=5?"#c3ddef":"#689ED5"),borderRadius:5,barThickness:28}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}}}}});}
+
+function drawDevice(d){destroy("dv");charts.dv=new Chart(document.getElementById("chartDevice"),{type:"doughnut",
+  data:{labels:d.device.map(x=>x[0]+" "+x[1]+"%"),datasets:[{data:d.device.map(x=>x[1]),backgroundColor:["#689ED5","#9cc3e5","#c3ddef"],borderColor:"#fff",borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
+
+function drawRegion(d){destroy("rg");charts.rg=new Chart(document.getElementById("chartRegion"),{type:"bar",
+  data:{labels:d.region.map(x=>x[0]),datasets:[{data:d.region.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:5,barThickness:16}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}}}}});}
+
+function drawWorst(d){
+  const note=v=>v<50?"ほぼ見られていません":v<90?"見直し候補":"少なめ";
+  document.getElementById("worstBody").innerHTML=d.worst.map(([p,v])=>`<tr><td>${p}</td><td class="n">${v}</td><td style="color:var(--ink-soft);font-size:12px">${note(v)}</td></tr>`).join("");
+}
+
+/* 用語辞典 */
+document.getElementById("glossaryBody").innerHTML=GLOSSARY.map(([t,p])=>`<tr><th>${t}</th><td>${p}</td></tr>`).join("");
+
+/* イベント */
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab");if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  b.classList.add("active");current=b.dataset.site;render(current);
+});
+document.getElementById("goalSwitch").addEventListener("click",e=>{
+  const b=e.target.closest(".goal");if(!b)return;
+  document.querySelectorAll(".goal").forEach(g=>g.classList.remove("active"));
+  b.classList.add("active");currentGoal=b.dataset.goal;renderAdvice();
+});
+/* ============================================================
+   GA4「レポート」CSV 読み込み（本実装）
+   考え方：落としたCSVが何のレポートかを列名から自動判別し、
+           いま表示中のサイトのデータに反映する
+   ============================================================ */
+const fileInput=document.getElementById("fileInput");
+const csvStatus=document.getElementById("csvStatus");
+document.getElementById("csvBtn").onclick=()=>fileInput.click();
+document.getElementById("resetBtn").onclick=()=>location.reload();
+
+fileInput.onchange=e=>{
+  const files=[...e.target.files]; if(!files.length)return;
+  let done=0; const msgs=[];
+  files.forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const res=ingestCSV(ev.target.result);
+      msgs.push("・"+f.name+"："+res);
+      if(++done===files.length){
+        render(current);
+        document.getElementById("resetBtn").style.display="";
+        csvStatus.innerHTML="<b style='color:var(--brand)'>読み込み結果（"+DATA[current].label+"に反映）</b><br>"+msgs.join("<br>")
+          +"<br><span style='font-size:12px'>※ 反映されなかった項目は、対応するレポートのCSVを追加で読み込んでください。</span>";
+      }
+    };
+    r.readAsText(f,"UTF-8");
+  });
+};
+
+/* CSVを解析して、現在のサイトDATAに反映。戻り値は結果メッセージ */
+function ingestCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2) return "データが読み取れませんでした";
+  // ヘッダー行を探す（GA4レポートCSVは先頭に # コメントや空行が入る）
+  let hi=rows.findIndex(r=>r.length>=2 && r.some(c=>c && isNaN(toNum(c))===false ? false : c));
+  // 上の判定が不安定なので、素直に「非#・要素2つ以上」の最初を採用
+  hi=rows.findIndex(r=>r.filter(x=>x!=="").length>=2);
+  if(hi<0) return "表の見出しが見つかりませんでした";
+  const header=rows[hi].map(h=>h.toLowerCase());
+  const body=rows.slice(hi+1).filter(r=>r.filter(x=>x!=="").length>=2);
+  const d=DATA[current];
+  const col=k=>header.findIndex(h=>k.some(x=>h.includes(x)));
+
+  // --- レポート種別を判別 ---
+  const cPage   = col(["ページ パス","ページタイトル","page path","page title","ページ"]);
+  const cChannel= col(["チャネル","channel","参照元","メディア","source","medium"]);
+  const cDevice = col(["デバイス","device"]);
+  const cCountry= col(["国","地域","市区町村","city","region","country"]);
+  const cDate   = col(["日","date","週","月","year"]);
+  const cViews  = col(["表示回数","閲覧数","views","ページビュー","screen page views"]);
+  const cSess   = col(["セッション","session"]);
+  const cUsers  = col(["ユーザー","user","アクティブ"]);
+  const cKw     = col(["検索クエリ","クエリ","query","キーワード"]);
+  const cImp    = col(["表示回数","impressions","インプレッション"]);
+  const cPos    = col(["掲載順位","position","順位"]);
+  const val=(r,i)=>i>=0?toNum(r[i]):0;
+  // 値の列を「ラベル列を除いた中で、数値が入っている列」から探す
+  const numCol=(exclude,prefer)=>{
+    for(const p of prefer){ const i=col([p]); if(i>=0 && i!==exclude) return i; }
+    // 見つからなければ、除外列以外で最初に数値が入っている列
+    for(let i=0;i<header.length;i++){
+      if(i===exclude) continue;
+      if(body.length && !isNaN(toNum(body[0][i])) && String(body[0][i]).match(/[0-9]/)) return i;
+    }
+    return -1;
+  };
+
+  // ページ別レポート
+  if(cPage>=0 && (cViews>=0||cSess>=0)){
+    const vc=cViews>=0?cViews:cSess;
+    const arr=body.map(r=>[r[cPage],val(r,vc)]).filter(x=>x[0]);
+    arr.sort((a,b)=>b[1]-a[1]);
+    if(arr.length){
+      d.pages=arr.slice(0,5).map(([p,v])=>[shorten(p),v]);
+      d.worst=arr.slice(-5).reverse().map(([p,v])=>[shorten(p),v]);
+      return "ページ別データを反映しました（上位・下位）";
+    }
+  }
+  // チャネル（流入元）レポート
+  if(cChannel>=0){
+    const vc=numCol(cChannel,["セッション","session","ユーザー","user"]);
+    const map={};
+    body.forEach(r=>{const k=translateChannel(r[cChannel]);map[k]=(map[k]||0)+(vc>=0?val(r,vc):1);});
+    const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.source=arr; return "流入元（どこから来たか）を反映しました"; }
+  }
+  // デバイスレポート
+  if(cDevice>=0){
+    const vc=numCol(cDevice,["セッション","session","ユーザー","user"]);
+    const map={};
+    body.forEach(r=>{const k=translateDevice(r[cDevice]);map[k]=(map[k]||0)+(vc>=0?val(r,vc):1);});
+    const total=Object.values(map).reduce((a,b)=>a+b,0)||1;
+    const arr=Object.entries(map).map(([k,v])=>[k,Math.round(v/total*100)]).sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.device=arr; return "デバイス（スマホ割合など）を反映しました"; }
+  }
+  // 地域レポート
+  if(cCountry>=0){
+    const vc=numCol(cCountry,["セッション","session","ユーザー","user","アクティブ"]);
+    const arr=body.map(r=>[r[cCountry],vc>=0?val(r,vc):1]).filter(x=>x[0]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    if(arr.length){ d.region=arr; return "地域データを反映しました（参考値）"; }
+  }
+  // 検索キーワードレポート（サチコ）
+  if(cKw>=0 && (cImp>=0||cPos>=0)){
+    const arr=body.map(r=>[r[cKw], cPos>=0?Math.round(val(r,cPos)):0, 0, cImp>=0?val(r,cImp):0]).filter(x=>x[0]).slice(0,5);
+    if(arr.length){ d.keywords=arr; return "検索キーワードを反映しました"; }
+  }
+  // 日別/月別の推移レポート
+  if(cDate>=0 && (cViews>=0||cSess>=0)){
+    const vc=cViews>=0?cViews:cSess;
+    const arr=body.map(r=>[r[cDate],val(r,vc)]).filter(x=>x[0]);
+    if(arr.length){
+      d.monthly=arr.map(([m,v])=>[String(m),v]);
+      return "推移データを反映しました";
+    }
+  }
+  return "対応する項目が見つかりませんでした（列名をご確認ください）";
+}
+
+function translateDevice(raw){
+  const s=(raw||"").toLowerCase();
+  if(s.includes("mobile")||s.includes("スマ")||s.includes("モバイル")) return "スマホ";
+  if(s.includes("desktop")||s.includes("パソコン")||s.includes("pc")) return "パソコン";
+  if(s.includes("tablet")||s.includes("タブレット")) return "タブレット";
+  return raw||"その他";
+}
+function translateChannel(raw){
+  const s=(raw||"").toLowerCase();
+  if(s.includes("organic search")||s.includes("検索")) return "検索から来た人";
+  if(s.includes("direct")||s.includes("直接")||s.includes("ノーリファラー")) return "直接アクセス";
+  if(s.includes("referral")||s.includes("参照")) return "よそのサイト経由";
+  if(s.includes("social")||s.includes("ソーシャル")) return "SNS経由";
+  if(s.includes("paid")||s.includes("広告")||s.includes("cpc")) return "広告経由";
+  if(s.includes("email")||s.includes("メール")) return "メール経由";
+  return raw||"その他";
+}
+
+/* CSVパーサ（ダブルクオート・BOM・#コメント対応） */
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,"");
+  const lines=text.split(/\r?\n/).filter(l=>l.trim()!=="" && !l.trim().startsWith("#"));
+  return lines.map(line=>{
+    const out=[];let cur="";let q=false;
+    for(let i=0;i<line.length;i++){const c=line[i];
+      if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+      else if(c===','&&!q){out.push(cur);cur="";}
+      else cur+=c;}
+    out.push(cur);return out.map(s=>s.trim());
+  });
+}
+function toNum(v){if(v==null)return 0;const n=parseFloat(String(v).replace(/[,%¥\s"]/g,""));return isNaN(n)?0:n;}
+function shorten(s){s=String(s);return s.length>16?s.slice(0,15)+"…":s;}
+
+/* 左メニュー：クリックで該当箇所へ移動して強調 */
+document.querySelector(".nav").addEventListener("click",e=>{
+  const a=e.target.closest("a"); if(!a) return;
+  e.preventDefault();
+  // メニューの選択状態を切り替え
+  document.querySelectorAll(".nav a").forEach(x=>x.classList.remove("active"));
+  a.classList.add("active");
+  const target=a.dataset.target;
+  if(target==="top"){ window.scrollTo({top:0,behavior:"smooth"}); return; }
+  const el=document.getElementById(target);
+  if(!el) return;
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  // 光らせる（連打対応でいったん外して付け直す）
+  el.classList.remove("flash");
+  void el.offsetWidth;           // アニメ再生をリセットするおまじない
+  el.classList.add("flash");
+});
+
+render("corp");
+</script>
 </body>
 </html>
