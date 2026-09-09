@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>光製薬 サイト参謀ダッシュボード｜数字を読んで、次の一手まで</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -130,6 +132,20 @@
     .nav a{border-left:none;padding:8px 14px;font-size:13px}.side .note{display:none}
     .kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.ov-grid{grid-template-columns:1fr}
   }
+  /* 提案用カバー */
+  .cover{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;border-radius:18px;padding:44px 40px;margin-bottom:22px;box-shadow:var(--shadow)}
+  .cover-tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;background:rgba(255,255,255,.18);padding:6px 14px;border-radius:999px;margin-bottom:16px}
+  .cover-title{font-size:32px;font-weight:800;letter-spacing:.02em;line-height:1.35}
+  .cover-sub{margin-top:12px;font-size:15px;line-height:1.9;opacity:.95}
+  .cover-sites{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+  .cover-sites span{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:8px 16px;border-radius:10px;font-size:13.5px;font-weight:700}
+  .cover-how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 20px}
+  .how-item{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6}
+  .how-item b{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#fff;color:var(--brand);align-items:center;justify-content:center;font-size:13px;margin-right:8px}
+  .cover-note{background:rgba(0,0,0,.15);border-radius:10px;padding:13px 16px;font-size:12px;line-height:1.8;opacity:.95}
+  .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
+  @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
+
   /* メニューで飛んだ先をふわっと強調 */
   @keyframes flashglow{
     0%{box-shadow:0 0 0 0 rgba(168,17,42,0)}
@@ -140,6 +156,8 @@
 
   @media print{
     .side,.actions,details.glossary,.tabs,.goal-switch{display:none!important}
+    .cover{break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .cover-title{color:#fff}
     body{background:#fff}.main{padding:0}
     .panel,.kpi,.strategist,.overview{box-shadow:none;break-inside:avoid}
   }
@@ -153,12 +171,37 @@
       <a class="active" data-target="top" href="#">🏠 ダッシュボード</a>
       <a data-target="panelPages" href="#">▦ ページ別に見る</a>
       <a data-target="panelKw" href="#">🔑 キーワード</a>
+      <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
+      <a data-target="panelWho" href="#">📱 見ている人</a>
       <a data-target="panelReport" href="#">📄 月次レポート</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
   </aside>
 
   <main class="main">
+
+    <!-- 提案用カバー（印刷時は1ページ目） -->
+    <section class="cover" id="cover">
+      <div class="cover-inner">
+        <div class="cover-tag">光製薬さま ご提案資料</div>
+        <h1 class="cover-title">3サイト分析ダッシュボード</h1>
+        <p class="cover-sub">むずかしい専門用語を使わずに、サイトの数字を読み、<br>課題を見つけ、目的に応じた「次の一手」までご提案します。</p>
+        <div class="cover-sites">
+          <span>コーポレートサイト</span><span>採用サイト</span><span>ビジョンサイト</span>
+        </div>
+        <div class="cover-how">
+          <div class="how-item"><b>1</b>上のタブで、3つのサイトを切り替え</div>
+          <div class="how-item"><b>2</b>数字はすべて、やさしい言葉に翻訳ずみ</div>
+          <div class="how-item"><b>3</b>画面下で、目的に応じた改善案をご提案</div>
+        </div>
+        <div class="cover-note">
+          ※ この画面は現在、動作イメージ用のサンプル数値を表示しています。<br>
+          実際のGA4データ（CSV）を読み込むと、本物の数字に置き換わります。
+        </div>
+        <div class="cover-foot">Smile Plus Consulting ／ 考えるを、ひとりにしない。</div>
+      </div>
+    </section>
+
     <div class="topbar">
       <div>
         <div class="tabs" id="tabs">
@@ -202,10 +245,59 @@
           <tbody id="kwBody"></tbody>
         </table>
       </div>
-      <div class="panel">
+      <div class="panel" id="panelSource">
         <h3>どこから来たか</h3>
         <p class="sub">お客さまがサイトにたどり着いた入口の内訳です。</p>
         <div class="canvas-holder short"><canvas id="chartSource"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 月別推移 -->
+    <div class="grid">
+      <div class="panel" id="panelMonthly" style="grid-column:1 / -1">
+        <h3>月ごとの移り変わり</h3>
+        <p class="sub">ページが見られた回数を、月単位でならべたものです。長い目での伸びが分かります。</p>
+        <div class="canvas-holder short"><canvas id="chartMonthly"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 時間帯・曜日 -->
+    <div class="grid" id="panelTime">
+      <div class="panel">
+        <h3>よく見られる時間帯</h3>
+        <p class="sub">1日のうち、どの時間に見られているか（0時〜23時）。発信のベストタイミングが見えます。</p>
+        <div class="canvas-holder short"><canvas id="chartHours"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>よく見られる曜日</h3>
+        <p class="sub">1週間のうち、どの曜日に見られているかです。</p>
+        <div class="canvas-holder short"><canvas id="chartWeekday"></canvas></div>
+      </div>
+    </div>
+
+    <!-- デバイス・地域 -->
+    <div class="grid" id="panelWho">
+      <div class="panel">
+        <h3>スマホで見ている人の割合</h3>
+        <p class="sub">どの機器で見られているか。スマホ中心なら、スマホでの見やすさが最優先です。</p>
+        <div class="canvas-holder short"><canvas id="chartDevice"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>どの地域から見ているか</h3>
+        <p class="sub">お客さまがアクセスしている地域の内訳です。</p>
+        <div class="canvas-holder short"><canvas id="chartRegion"></canvas></div>
+      </div>
+    </div>
+
+    <!-- あまり見られていないページ -->
+    <div class="grid">
+      <div class="panel" id="panelWorst" style="grid-column:1 / -1">
+        <h3>あまり見られていないページ</h3>
+        <p class="sub">見られた回数が少ないページ 下位5つ。埋もれている情報や、見直しの候補です。</p>
+        <table>
+          <thead><tr><th>ページ</th><th class="n">見られた回数</th><th>ひとこと</th></tr></thead>
+          <tbody id="worstBody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -243,8 +335,11 @@
 
     <div class="actions" id="panelReport">
       <button class="btn btn-main" onclick="window.print()">この提案を印刷 / PDF保存</button>
-      <button class="btn btn-ghost" id="csvBtn">CSVを読み込む（次ステップで実装）</button>
+      <button class="btn btn-ghost" id="csvBtn">GA4のCSVを読み込む</button>
+      <input type="file" id="fileInput" accept=".csv" multiple style="display:none">
+      <button class="btn btn-ghost" id="resetBtn" style="display:none">サンプルに戻す</button>
     </div>
+    <div id="csvStatus" style="margin-top:12px;font-size:13px;color:var(--ink-soft)"></div>
 
     <footer>
       <p class="motto">考えるを、ひとりにしない。</p>
@@ -264,7 +359,13 @@ const DATA={
     dirs:[["/blog/",12400],["/service/",8300],["/case-studies/",4100],["/price/",3050]],
     pages:[["コンサル紹介",1560],["点滴ガイド記事",1280],["導入事例",990],["料金ページ",760],["SEO基礎記事",540]],
     source:[["検索から来た人",7200],["直接アクセス",3100],["よそのサイト経由",1600],["SNS経由",1120]],
-    keywords:[["輸液ポンプ 選び方",3,2,8400],["輸液セット 種類",5,-1,6200],["経静脈輸液 とは",7,4,5100],["高カロリー輸液 メーカー",11,0,3300],["輸液療法 副作用",15,-3,2100]]},
+    keywords:[["輸液ポンプ 選び方",3,2,8400],["輸液セット 種類",5,-1,6200],["経静脈輸液 とは",7,4,5100],["高カロリー輸液 メーカー",11,0,3300],["輸液療法 副作用",15,-3,2100]],
+    monthly:[["6月",78000],["7月",82000],["8月",79000],["9月",91000],["10月",103000],["11月",112000]],
+    worst:[["採用要項(古)",42],["englishサイト",58],["プレスリリース2019",71],["サイトマップ",96],["個人情報方針",120]],
+    hours:[120,90,60,45,40,55,110,260,420,510,560,540,600,580,610,590,620,600,540,480,420,360,280,190],
+    weekday:[["月",4200],["火",4600],["水",4800],["木",4500],["金",4300],["土",1900],["日",1700]],
+    device:[["スマホ",58],["パソコン",36],["タブレット",6]],
+    region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]]},
   recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -272,7 +373,13 @@ const DATA={
     dirs:[["/message/",3800],["/interview/",2600],["/jobs/",1900],["/culture/",1120]],
     pages:[["社員インタビュー",1120],["募集要項",980],["代表メッセージ",720],["福利厚生",510],["1日の流れ",360]],
     source:[["検索から来た人",1800],["SNS経由",1200],["直接アクセス",760],["よそのサイト経由",420]],
-    keywords:[["光製薬 採用",2,1,4200],["製薬 MR 未経験",8,5,3100],["光製薬 評判 社員",6,-2,2400],["製薬会社 働きやすい",14,3,1600],["光製薬 新卒",4,0,1350]]},
+    keywords:[["光製薬 採用",2,1,4200],["製薬 MR 未経験",8,5,3100],["光製薬 評判 社員",6,-2,2400],["製薬会社 働きやすい",14,3,1600],["光製薬 新卒",4,0,1350]],
+    monthly:[["6月",18000],["7月",19500],["8月",17000],["9月",24000],["10月",31000],["11月",38000]],
+    worst:[["よくある質問",22],["先輩の休日",35],["研修制度(詳細)",48],["数字で見る当社",63],["エントリー方法",88]],
+    hours:[80,50,30,20,18,25,60,150,180,190,175,200,240,220,210,205,215,230,300,380,420,360,260,150],
+    weekday:[["月",1400],["火",1500],["水",1550],["木",1480],["金",1420],["土",820],["日",760]],
+    device:[["スマホ",74],["パソコン",22],["タブレット",4]],
+    region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]]},
   vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -280,7 +387,13 @@ const DATA={
     dirs:[["/vision/",2400],["/sustainability/",1600],["/rd/",980],["/history/",680]],
     pages:[["企業ビジョン",860],["サステナビリティ",640],["研究開発",480],["沿革",320],["社会貢献",210]],
     source:[["直接アクセス",980],["検索から来た人",760],["よそのサイト経由",380],["SNS経由",220]],
-    keywords:[["光製薬 企業理念",5,2,1800],["製薬 サステナビリティ",18,-4,1200],["光製薬 研究開発",9,1,960],["医薬品 社会貢献",22,6,640],["光製薬 歴史",7,0,520]]}
+    keywords:[["光製薬 企業理念",5,2,1800],["製薬 サステナビリティ",18,-4,1200],["光製薬 研究開発",9,1,960],["医薬品 社会貢献",22,6,640],["光製薬 歴史",7,0,520]],
+    monthly:[["6月",14000],["7月",14500],["8月",13800],["9月",15200],["10月",15600],["11月",16200]],
+    worst:[["沿革(詳細年表)",18],["IR情報",29],["役員一覧",44],["環境方針PDF",67],["用語集",92]],
+    hours:[60,45,30,22,20,28,55,120,160,175,180,170,190,185,180,175,170,165,150,140,120,100,85,70],
+    weekday:[["月",1600],["火",1650],["水",1620],["木",1580],["金",1500],["土",680],["日",640]],
+    device:[["パソコン",52],["スマホ",42],["タブレット",6]],
+    region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]]}
 };
 
 const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
@@ -419,6 +532,7 @@ function render(site){
   }).join("");
 
   drawTrend(d);drawPages(d);drawSource(d);
+  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);
   renderStrategist(d);
   renderOverview();
 }
@@ -473,6 +587,36 @@ function drawSource(d){destroy("s");charts.s=new Chart(document.getElementById("
   data:{labels:d.source.map(x=>x[0]),datasets:[{data:d.source.map(x=>x[1]),backgroundColor:["#a8112a","#d98a95","#e0b3ba","#7d0d20","#c98a95"],borderColor:"#fff",borderWidth:2}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
 
+function drawMonthly(d){destroy("m");charts.m=new Chart(document.getElementById("chartMonthly"),{type:"bar",
+  data:{labels:d.monthly.map(x=>x[0]),datasets:[{data:d.monthly.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:6,barThickness:34}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}}}}});}
+
+function drawHours(d){destroy("h");const lbl=d.hours.map((_,i)=>i+"時");
+  charts.h=new Chart(document.getElementById("chartHours"),{type:"bar",
+  data:{labels:lbl,datasets:[{data:d.hours,backgroundColor:d.hours.map(v=>v>=Math.max(...d.hours)*0.8?"#a8112a":"#e0b3ba"),borderRadius:3}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>c[0].label+"台"}}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:9},color:"#6b6259",maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}}}}});}
+
+function drawWeekday(d){destroy("w");charts.w=new Chart(document.getElementById("chartWeekday"),{type:"bar",
+  data:{labels:d.weekday.map(x=>x[0]),datasets:[{data:d.weekday.map(x=>x[1]),backgroundColor:d.weekday.map((x,i)=>i>=5?"#e0b3ba":"#a8112a"),borderRadius:5,barThickness:28}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}}}}});}
+
+function drawDevice(d){destroy("dv");charts.dv=new Chart(document.getElementById("chartDevice"),{type:"doughnut",
+  data:{labels:d.device.map(x=>x[0]+" "+x[1]+"%"),datasets:[{data:d.device.map(x=>x[1]),backgroundColor:["#a8112a","#d98a95","#e0b3ba"],borderColor:"#fff",borderWidth:2}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
+
+function drawRegion(d){destroy("rg");charts.rg=new Chart(document.getElementById("chartRegion"),{type:"bar",
+  data:{labels:d.region.map(x=>x[0]),datasets:[{data:d.region.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:5,barThickness:16}]},
+  options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}}}}});}
+
+function drawWorst(d){
+  const note=v=>v<50?"ほぼ見られていません":v<90?"見直し候補":"少なめ";
+  document.getElementById("worstBody").innerHTML=d.worst.map(([p,v])=>`<tr><td>${p}</td><td class="n">${v}</td><td style="color:var(--ink-soft);font-size:12px">${note(v)}</td></tr>`).join("");
+}
+
 /* 用語辞典 */
 document.getElementById("glossaryBody").innerHTML=GLOSSARY.map(([t,p])=>`<tr><th>${t}</th><td>${p}</td></tr>`).join("");
 
@@ -487,7 +631,157 @@ document.getElementById("goalSwitch").addEventListener("click",e=>{
   document.querySelectorAll(".goal").forEach(g=>g.classList.remove("active"));
   b.classList.add("active");currentGoal=b.dataset.goal;renderAdvice();
 });
-document.getElementById("csvBtn").onclick=()=>alert("実データCSVの読み込みは、由也さんのCSVを1枚いただければ次のステップで組み込みます😊\n列名に合わせて正確に実装します。");
+/* ============================================================
+   GA4「レポート」CSV 読み込み（本実装）
+   考え方：落としたCSVが何のレポートかを列名から自動判別し、
+           いま表示中のサイトのデータに反映する
+   ============================================================ */
+const fileInput=document.getElementById("fileInput");
+const csvStatus=document.getElementById("csvStatus");
+document.getElementById("csvBtn").onclick=()=>fileInput.click();
+document.getElementById("resetBtn").onclick=()=>location.reload();
+
+fileInput.onchange=e=>{
+  const files=[...e.target.files]; if(!files.length)return;
+  let done=0; const msgs=[];
+  files.forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      const res=ingestCSV(ev.target.result);
+      msgs.push("・"+f.name+"："+res);
+      if(++done===files.length){
+        render(current);
+        document.getElementById("resetBtn").style.display="";
+        csvStatus.innerHTML="<b style='color:var(--brand)'>読み込み結果（"+DATA[current].label+"に反映）</b><br>"+msgs.join("<br>")
+          +"<br><span style='font-size:12px'>※ 反映されなかった項目は、対応するレポートのCSVを追加で読み込んでください。</span>";
+      }
+    };
+    r.readAsText(f,"UTF-8");
+  });
+};
+
+/* CSVを解析して、現在のサイトDATAに反映。戻り値は結果メッセージ */
+function ingestCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2) return "データが読み取れませんでした";
+  // ヘッダー行を探す（GA4レポートCSVは先頭に # コメントや空行が入る）
+  let hi=rows.findIndex(r=>r.length>=2 && r.some(c=>c && isNaN(toNum(c))===false ? false : c));
+  // 上の判定が不安定なので、素直に「非#・要素2つ以上」の最初を採用
+  hi=rows.findIndex(r=>r.filter(x=>x!=="").length>=2);
+  if(hi<0) return "表の見出しが見つかりませんでした";
+  const header=rows[hi].map(h=>h.toLowerCase());
+  const body=rows.slice(hi+1).filter(r=>r.filter(x=>x!=="").length>=2);
+  const d=DATA[current];
+  const col=k=>header.findIndex(h=>k.some(x=>h.includes(x)));
+
+  // --- レポート種別を判別 ---
+  const cPage   = col(["ページ パス","ページタイトル","page path","page title","ページ"]);
+  const cChannel= col(["チャネル","channel","参照元","メディア","source","medium"]);
+  const cDevice = col(["デバイス","device"]);
+  const cCountry= col(["国","地域","市区町村","city","region","country"]);
+  const cDate   = col(["日","date","週","月","year"]);
+  const cViews  = col(["表示回数","閲覧数","views","ページビュー","screen page views"]);
+  const cSess   = col(["セッション","session"]);
+  const cUsers  = col(["ユーザー","user","アクティブ"]);
+  const cKw     = col(["検索クエリ","クエリ","query","キーワード"]);
+  const cImp    = col(["表示回数","impressions","インプレッション"]);
+  const cPos    = col(["掲載順位","position","順位"]);
+  const val=(r,i)=>i>=0?toNum(r[i]):0;
+  // 値の列を「ラベル列を除いた中で、数値が入っている列」から探す
+  const numCol=(exclude,prefer)=>{
+    for(const p of prefer){ const i=col([p]); if(i>=0 && i!==exclude) return i; }
+    // 見つからなければ、除外列以外で最初に数値が入っている列
+    for(let i=0;i<header.length;i++){
+      if(i===exclude) continue;
+      if(body.length && !isNaN(toNum(body[0][i])) && String(body[0][i]).match(/[0-9]/)) return i;
+    }
+    return -1;
+  };
+
+  // ページ別レポート
+  if(cPage>=0 && (cViews>=0||cSess>=0)){
+    const vc=cViews>=0?cViews:cSess;
+    const arr=body.map(r=>[r[cPage],val(r,vc)]).filter(x=>x[0]);
+    arr.sort((a,b)=>b[1]-a[1]);
+    if(arr.length){
+      d.pages=arr.slice(0,5).map(([p,v])=>[shorten(p),v]);
+      d.worst=arr.slice(-5).reverse().map(([p,v])=>[shorten(p),v]);
+      return "ページ別データを反映しました（上位・下位）";
+    }
+  }
+  // チャネル（流入元）レポート
+  if(cChannel>=0){
+    const vc=numCol(cChannel,["セッション","session","ユーザー","user"]);
+    const map={};
+    body.forEach(r=>{const k=translateChannel(r[cChannel]);map[k]=(map[k]||0)+(vc>=0?val(r,vc):1);});
+    const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.source=arr; return "流入元（どこから来たか）を反映しました"; }
+  }
+  // デバイスレポート
+  if(cDevice>=0){
+    const vc=numCol(cDevice,["セッション","session","ユーザー","user"]);
+    const map={};
+    body.forEach(r=>{const k=translateDevice(r[cDevice]);map[k]=(map[k]||0)+(vc>=0?val(r,vc):1);});
+    const total=Object.values(map).reduce((a,b)=>a+b,0)||1;
+    const arr=Object.entries(map).map(([k,v])=>[k,Math.round(v/total*100)]).sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.device=arr; return "デバイス（スマホ割合など）を反映しました"; }
+  }
+  // 地域レポート
+  if(cCountry>=0){
+    const vc=numCol(cCountry,["セッション","session","ユーザー","user","アクティブ"]);
+    const arr=body.map(r=>[r[cCountry],vc>=0?val(r,vc):1]).filter(x=>x[0]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    if(arr.length){ d.region=arr; return "地域データを反映しました（参考値）"; }
+  }
+  // 検索キーワードレポート（サチコ）
+  if(cKw>=0 && (cImp>=0||cPos>=0)){
+    const arr=body.map(r=>[r[cKw], cPos>=0?Math.round(val(r,cPos)):0, 0, cImp>=0?val(r,cImp):0]).filter(x=>x[0]).slice(0,5);
+    if(arr.length){ d.keywords=arr; return "検索キーワードを反映しました"; }
+  }
+  // 日別/月別の推移レポート
+  if(cDate>=0 && (cViews>=0||cSess>=0)){
+    const vc=cViews>=0?cViews:cSess;
+    const arr=body.map(r=>[r[cDate],val(r,vc)]).filter(x=>x[0]);
+    if(arr.length){
+      d.monthly=arr.map(([m,v])=>[String(m),v]);
+      return "推移データを反映しました";
+    }
+  }
+  return "対応する項目が見つかりませんでした（列名をご確認ください）";
+}
+
+function translateDevice(raw){
+  const s=(raw||"").toLowerCase();
+  if(s.includes("mobile")||s.includes("スマ")||s.includes("モバイル")) return "スマホ";
+  if(s.includes("desktop")||s.includes("パソコン")||s.includes("pc")) return "パソコン";
+  if(s.includes("tablet")||s.includes("タブレット")) return "タブレット";
+  return raw||"その他";
+}
+function translateChannel(raw){
+  const s=(raw||"").toLowerCase();
+  if(s.includes("organic search")||s.includes("検索")) return "検索から来た人";
+  if(s.includes("direct")||s.includes("直接")||s.includes("ノーリファラー")) return "直接アクセス";
+  if(s.includes("referral")||s.includes("参照")) return "よそのサイト経由";
+  if(s.includes("social")||s.includes("ソーシャル")) return "SNS経由";
+  if(s.includes("paid")||s.includes("広告")||s.includes("cpc")) return "広告経由";
+  if(s.includes("email")||s.includes("メール")) return "メール経由";
+  return raw||"その他";
+}
+
+/* CSVパーサ（ダブルクオート・BOM・#コメント対応） */
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,"");
+  const lines=text.split(/\r?\n/).filter(l=>l.trim()!=="" && !l.trim().startsWith("#"));
+  return lines.map(line=>{
+    const out=[];let cur="";let q=false;
+    for(let i=0;i<line.length;i++){const c=line[i];
+      if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+      else if(c===','&&!q){out.push(cur);cur="";}
+      else cur+=c;}
+    out.push(cur);return out.map(s=>s.trim());
+  });
+}
+function toNum(v){if(v==null)return 0;const n=parseFloat(String(v).replace(/[,%¥\s"]/g,""));return isNaN(n)?0:n;}
+function shorten(s){s=String(s);return s.length>16?s.slice(0,15)+"…":s;}
 
 /* 左メニュー：クリックで該当箇所へ移動して強調 */
 document.querySelector(".nav").addEventListener("click",e=>{
