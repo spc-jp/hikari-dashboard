@@ -130,6 +130,14 @@
     .nav a{border-left:none;padding:8px 14px;font-size:13px}.side .note{display:none}
     .kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.ov-grid{grid-template-columns:1fr}
   }
+  /* メニューで飛んだ先をふわっと強調 */
+  @keyframes flashglow{
+    0%{box-shadow:0 0 0 0 rgba(168,17,42,0)}
+    25%{box-shadow:0 0 0 4px rgba(168,17,42,.35)}
+    100%{box-shadow:0 0 0 0 rgba(168,17,42,0)}
+  }
+  .flash{animation:flashglow 1.4s ease-out}
+
   @media print{
     .side,.actions,details.glossary,.tabs,.goal-switch{display:none!important}
     body{background:#fff}.main{padding:0}
@@ -142,10 +150,10 @@
   <aside class="side">
     <div class="logo">光製薬<small>SITE 参謀 DASHBOARD</small></div>
     <nav class="nav">
-      <a class="active" href="#">🏠 ダッシュボード</a>
-      <a href="#">▦ ページ別に見る</a>
-      <a href="#">🔑 キーワード</a>
-      <a href="#">📄 月次レポート</a>
+      <a class="active" data-target="top" href="#">🏠 ダッシュボード</a>
+      <a data-target="panelPages" href="#">▦ ページ別に見る</a>
+      <a data-target="panelKw" href="#">🔑 キーワード</a>
+      <a data-target="panelReport" href="#">📄 月次レポート</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
   </aside>
@@ -178,7 +186,7 @@
         <div class="canvas-holder"><canvas id="chartTrend"></canvas></div>
         <div class="dirs" id="dirs"></div>
       </div>
-      <div class="panel">
+      <div class="panel" id="panelPages">
         <h3>よく読まれたページ</h3>
         <p class="sub">直近1週間で、いちばん見られたページ 上位5つ。</p>
         <div class="canvas-holder short"><canvas id="chartPages"></canvas></div>
@@ -186,7 +194,7 @@
     </div>
 
     <div class="grid">
-      <div class="panel">
+      <div class="panel" id="panelKw">
         <h3>検索で見つけてもらえた言葉</h3>
         <p class="sub">お客さまがGoogleで打ち込んで、サイトが表示された言葉です。</p>
         <table>
@@ -233,7 +241,7 @@
       <table class="gtable"><tbody id="glossaryBody"></tbody></table>
     </details>
 
-    <div class="actions">
+    <div class="actions" id="panelReport">
       <button class="btn btn-main" onclick="window.print()">この提案を印刷 / PDF保存</button>
       <button class="btn btn-ghost" id="csvBtn">CSVを読み込む（次ステップで実装）</button>
     </div>
@@ -480,6 +488,24 @@ document.getElementById("goalSwitch").addEventListener("click",e=>{
   b.classList.add("active");currentGoal=b.dataset.goal;renderAdvice();
 });
 document.getElementById("csvBtn").onclick=()=>alert("実データCSVの読み込みは、由也さんのCSVを1枚いただければ次のステップで組み込みます😊\n列名に合わせて正確に実装します。");
+
+/* 左メニュー：クリックで該当箇所へ移動して強調 */
+document.querySelector(".nav").addEventListener("click",e=>{
+  const a=e.target.closest("a"); if(!a) return;
+  e.preventDefault();
+  // メニューの選択状態を切り替え
+  document.querySelectorAll(".nav a").forEach(x=>x.classList.remove("active"));
+  a.classList.add("active");
+  const target=a.dataset.target;
+  if(target==="top"){ window.scrollTo({top:0,behavior:"smooth"}); return; }
+  const el=document.getElementById(target);
+  if(!el) return;
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  // 光らせる（連打対応でいったん外して付け直す）
+  el.classList.remove("flash");
+  void el.offsetWidth;           // アニメ再生をリセットするおまじない
+  el.classList.add("flash");
+});
 
 render("corp");
 </script>
