@@ -9,31 +9,32 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --brand:#a8112a;--brand-deep:#7d0d20;--brand-soft:#fbe9ec;--brand-line:#f0cdd4;
-    --ink:#2a2320;--ink-soft:#6b6259;--paper:#f7f4f2;--card:#ffffff;--line:#ece5e0;
+    --brand:#689ED5;--brand-deep:#3f6fa0;--brand-soft:#eaf3fa;--brand-line:#c3ddef;
+    --accent:#c8102e;--accent-deep:#a50d26;--accent-soft:#fdeef0;
+    --ink:#22303a;--ink-soft:#5a6b78;--paper:#eef6fb;--card:#DCEDF4;--line:#c9dfec;
     --up:#1f8a4c;--down:#c23b2e;--gold:#b0842f;
-    --shadow:0 1px 2px rgba(42,35,32,.05), 0 6px 20px rgba(42,35,32,.06);
+    --shadow:0 1px 2px rgba(34,48,58,.05), 0 6px 20px rgba(34,48,58,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,Meiryo,sans-serif;
     background:var(--paper);color:var(--ink);line-height:1.7;letter-spacing:.01em;display:flex;min-height:100vh}
 
-  /* サイドバー */
-  .side{width:210px;flex:0 0 210px;background:var(--brand);color:#fff;padding:26px 0;position:sticky;top:0;height:100vh}
-  .side .logo{padding:0 24px 22px;font-size:20px;font-weight:800;letter-spacing:.04em}
-  .side .logo small{display:block;font-size:11px;font-weight:500;opacity:.8;letter-spacing:.06em;margin-top:4px}
-  .nav a{display:flex;align-items:center;gap:11px;padding:12px 24px;color:#fff;text-decoration:none;font-size:14px;opacity:.85;border-left:3px solid transparent;transition:.15s}
-  .nav a:hover{opacity:1;background:rgba(255,255,255,.08)}
-  .nav a.active{opacity:1;background:rgba(255,255,255,.12);border-left-color:#fff;font-weight:700}
-  .side .note{margin:24px;padding:14px;background:rgba(255,255,255,.10);border-radius:10px;font-size:11.5px;line-height:1.7;opacity:.9}
+  /* サイドバー（実物サイト風：白背景・青文字・赤ワンポイント） */
+  .side{width:210px;flex:0 0 210px;background:#ffffff;color:var(--ink);padding:26px 0;position:sticky;top:0;height:100vh;border-right:1px solid var(--line)}
+  .side .logo{padding:0 24px 22px;font-size:20px;font-weight:800;letter-spacing:.04em;color:var(--accent)}
+  .side .logo small{display:block;font-size:11px;font-weight:600;color:var(--brand-deep);letter-spacing:.06em;margin-top:4px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:12px 24px;color:var(--ink-soft);text-decoration:none;font-size:14px;border-left:3px solid transparent;transition:.15s}
+  .nav a:hover{color:var(--brand-deep);background:var(--brand-soft)}
+  .nav a.active{color:var(--brand-deep);background:var(--brand-soft);border-left-color:var(--accent);font-weight:700}
+  .side .note{margin:24px;padding:14px;background:var(--brand-soft);border-radius:10px;font-size:11.5px;line-height:1.7;color:var(--ink-soft)}
 
   .main{flex:1;min-width:0;padding:24px 30px 60px}
   .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
   .tabs{display:flex;gap:4px;background:var(--card);padding:5px;border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow)}
   .tab{appearance:none;border:none;cursor:pointer;font-family:inherit;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:700;color:var(--ink-soft);background:transparent;transition:.15s}
   .tab:hover{color:var(--brand)}
-  .tab.active{background:var(--brand);color:#fff}
+  .tab.active{background:var(--brand-deep);color:#fff}
   .period{font-size:12.5px;color:var(--ink-soft);margin-top:12px}
 
   /* KPI */
@@ -67,7 +68,7 @@
   .rankchg.up{color:var(--up);font-weight:700}.rankchg.down{color:var(--down);font-weight:700}.rankchg.flat{color:var(--ink-soft)}
 
   /* ===== 参謀パネル（目玉） ===== */
-  .strategist{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#fdf6f7);border:1px solid var(--brand-line);border-left:5px solid var(--brand);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
+  .strategist{grid-column:1 / -1;background:linear-gradient(180deg,#fff,#f4f9fd);border:1px solid var(--brand-line);border-left:5px solid var(--accent);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
   .strategist .head{display:flex;align-items:center;gap:11px;margin-bottom:6px;flex-wrap:wrap}
   .strategist .avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);display:inline-flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
   .strategist .who{font-size:15px;font-weight:800}
@@ -79,7 +80,7 @@
   .badge.good{background:#e6f4ec;color:#1f8a4c}
   .badge.leak{background:#fdeee9;color:#c25a2e}
   .badge.thin{background:#fff4e0;color:#b0842f}
-  .badge.warn{background:#fbe9ec;color:#a8112a}
+  .badge.warn{background:var(--accent-soft);color:var(--accent)}
   .badge .dot{width:9px;height:9px;border-radius:50%;background:currentColor}
   .state-desc{font-size:13px;color:var(--ink-soft)}
 
@@ -88,7 +89,7 @@
   .goal{appearance:none;border:1.5px solid var(--brand-line);background:#fff;cursor:pointer;font-family:inherit;
     padding:10px 18px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--ink-soft);transition:.15s;display:flex;align-items:center;gap:8px}
   .goal:hover{border-color:var(--brand);color:var(--brand)}
-  .goal.active{background:var(--brand);border-color:var(--brand);color:#fff}
+  .goal.active{background:var(--brand-deep);border-color:var(--brand-deep);color:#fff}
   .goal-label{font-size:12px;color:var(--ink-soft);margin-bottom:2px}
 
   /* 提案カード */
@@ -97,7 +98,7 @@
   .steps{list-style:none;counter-reset:step}
   .steps li{position:relative;counter-increment:step;padding:14px 16px 14px 52px;margin-bottom:11px;background:#fff;border:1px solid var(--brand-line);border-radius:12px;font-size:14px}
   .steps li:last-child{margin-bottom:0}
-  .steps li::before{content:counter(step);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+  .steps li::before{content:counter(step);position:absolute;left:14px;top:13px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
   .steps li b{color:var(--brand-deep)}
   .steps li .why{display:block;margin-top:5px;font-size:12.5px;color:var(--ink-soft)}
 
@@ -121,36 +122,37 @@
   .actions{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
   .btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:11px 20px;border-radius:10px;transition:.15s}
   .btn-main{background:var(--brand);color:#fff}.btn-main:hover{background:var(--brand-deep)}
+  .btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:var(--accent-deep)}
   .btn-ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand)}.btn-ghost:hover{background:var(--brand-soft)}
   footer{margin-top:34px;text-align:center;color:var(--ink-soft);font-size:12px}
   footer .motto{color:var(--brand);font-weight:700}
 
   @media(max-width:900px){
     body{flex-direction:column}
-    .side{width:100%;height:auto;position:static;padding:16px 0;display:flex;flex-wrap:wrap;align-items:center}
+    .side{width:100%;height:auto;position:static;padding:16px 0;display:flex;flex-wrap:wrap;align-items:center;border-right:none;border-bottom:1px solid var(--line)}
     .side .logo{padding:0 20px;flex:1}.nav{display:flex;flex-wrap:wrap}
     .nav a{border-left:none;padding:8px 14px;font-size:13px}.side .note{display:none}
     .kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.ov-grid{grid-template-columns:1fr}
   }
   /* 提案用カバー */
   .cover{background:linear-gradient(135deg,var(--brand),var(--brand-deep));color:#fff;border-radius:18px;padding:44px 40px;margin-bottom:22px;box-shadow:var(--shadow)}
-  .cover-tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;background:rgba(255,255,255,.18);padding:6px 14px;border-radius:999px;margin-bottom:16px}
+  .cover-tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.08em;background:var(--accent);color:#fff;padding:6px 14px;border-radius:999px;margin-bottom:16px}
   .cover-title{font-size:32px;font-weight:800;letter-spacing:.02em;line-height:1.35}
   .cover-sub{margin-top:12px;font-size:15px;line-height:1.9;opacity:.95}
   .cover-sites{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
   .cover-sites span{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:8px 16px;border-radius:10px;font-size:13.5px;font-weight:700}
   .cover-how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 20px}
   .how-item{background:rgba(255,255,255,.12);border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.6}
-  .how-item b{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#fff;color:var(--brand);align-items:center;justify-content:center;font-size:13px;margin-right:8px}
+  .how-item b{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:13px;margin-right:8px}
   .cover-note{background:rgba(0,0,0,.15);border-radius:10px;padding:13px 16px;font-size:12px;line-height:1.8;opacity:.95}
   .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
   @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
 
   /* メニューで飛んだ先をふわっと強調 */
   @keyframes flashglow{
-    0%{box-shadow:0 0 0 0 rgba(168,17,42,0)}
-    25%{box-shadow:0 0 0 4px rgba(168,17,42,.35)}
-    100%{box-shadow:0 0 0 0 rgba(168,17,42,0)}
+    0%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
+    25%{box-shadow:0 0 0 4px rgba(104,158,213,.35)}
+    100%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
   }
   .flash{animation:flashglow 1.4s ease-out}
 
@@ -334,7 +336,7 @@
     </details>
 
     <div class="actions" id="panelReport">
-      <button class="btn btn-main" onclick="window.print()">この提案を印刷 / PDF保存</button>
+      <button class="btn btn-accent" onclick="window.print()">この提案を印刷 / PDF保存</button>
       <button class="btn btn-ghost" id="csvBtn">GA4のCSVを読み込む</button>
       <input type="file" id="fileInput" accept=".csv" multiple style="display:none">
       <button class="btn btn-ghost" id="resetBtn" style="display:none">サンプルに戻す</button>
@@ -575,42 +577,42 @@ function renderOverview(){
 function destroy(k){if(charts[k])charts[k].destroy();}
 function drawTrend(d){destroy("t");charts.t=new Chart(document.getElementById("chartTrend"),{type:"line",
   data:{labels:d.trendLabels,datasets:[
-    {label:"訪問回数",data:d.trendSessions,borderColor:"#a8112a",backgroundColor:"rgba(168,17,42,.08)",borderWidth:2.6,fill:true,tension:.35,pointRadius:3,pointBackgroundColor:"#a8112a"},
-    {label:"初めての方",data:d.trendNew,borderColor:"#c98a95",borderWidth:2,borderDash:[5,4],fill:false,tension:.35,pointRadius:0}]},
+    {label:"訪問回数",data:d.trendSessions,borderColor:"#689ED5",backgroundColor:"rgba(104,158,213,.08)",borderWidth:2.6,fill:true,tension:.35,pointRadius:3,pointBackgroundColor:"#689ED5"},
+    {label:"初めての方",data:d.trendNew,borderColor:"#a9c9e6",borderWidth:2,borderDash:[5,4],fill:false,tension:.35,pointRadius:0}]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",align:"end",labels:{font:{family:FONT,size:12},boxWidth:14,padding:14}}},
-    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:11},color:"#6b6259"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}}}}});}
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}}}}});}
 function drawPages(d){destroy("p");charts.p=new Chart(document.getElementById("chartPages"),{type:"bar",
-  data:{labels:d.pages.map(x=>x[0]),datasets:[{data:d.pages.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:6,barThickness:16}]},
+  data:{labels:d.pages.map(x=>x[0]),datasets:[{data:d.pages.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:6,barThickness:16}]},
   options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{x:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}}}}});}
+    scales:{x:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}}}}});}
 function drawSource(d){destroy("s");charts.s=new Chart(document.getElementById("chartSource"),{type:"doughnut",
-  data:{labels:d.source.map(x=>x[0]),datasets:[{data:d.source.map(x=>x[1]),backgroundColor:["#a8112a","#d98a95","#e0b3ba","#7d0d20","#c98a95"],borderColor:"#fff",borderWidth:2}]},
+  data:{labels:d.source.map(x=>x[0]),datasets:[{data:d.source.map(x=>x[1]),backgroundColor:["#689ED5","#9cc3e5","#c3ddef","#3f6fa0","#a9c9e6"],borderColor:"#fff",borderWidth:2}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
 
 function drawMonthly(d){destroy("m");charts.m=new Chart(document.getElementById("chartMonthly"),{type:"bar",
-  data:{labels:d.monthly.map(x=>x[0]),datasets:[{data:d.monthly.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:6,barThickness:34}]},
+  data:{labels:d.monthly.map(x=>x[0]),datasets:[{data:d.monthly.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:6,barThickness:34}]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:11},color:"#6b6259"}}}}});}
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:11},color:"#5a6b78"}}}}});}
 
 function drawHours(d){destroy("h");const lbl=d.hours.map((_,i)=>i+"時");
   charts.h=new Chart(document.getElementById("chartHours"),{type:"bar",
-  data:{labels:lbl,datasets:[{data:d.hours,backgroundColor:d.hours.map(v=>v>=Math.max(...d.hours)*0.8?"#a8112a":"#e0b3ba"),borderRadius:3}]},
+  data:{labels:lbl,datasets:[{data:d.hours,backgroundColor:d.hours.map(v=>v>=Math.max(...d.hours)*0.8?"#689ED5":"#c3ddef"),borderRadius:3}]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:c=>c[0].label+"台"}}},
-    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:9},color:"#6b6259",maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}}}}});}
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:9},color:"#5a6b78",maxRotation:0,autoSkip:true,maxTicksLimit:12}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}}}}});}
 
 function drawWeekday(d){destroy("w");charts.w=new Chart(document.getElementById("chartWeekday"),{type:"bar",
-  data:{labels:d.weekday.map(x=>x[0]),datasets:[{data:d.weekday.map(x=>x[1]),backgroundColor:d.weekday.map((x,i)=>i>=5?"#e0b3ba":"#a8112a"),borderRadius:5,barThickness:28}]},
+  data:{labels:d.weekday.map(x=>x[0]),datasets:[{data:d.weekday.map(x=>x[1]),backgroundColor:d.weekday.map((x,i)=>i>=5?"#c3ddef":"#689ED5"),borderRadius:5,barThickness:28}]},
   options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}},y:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}}}}});}
+    scales:{x:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}},y:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}}}}});}
 
 function drawDevice(d){destroy("dv");charts.dv=new Chart(document.getElementById("chartDevice"),{type:"doughnut",
-  data:{labels:d.device.map(x=>x[0]+" "+x[1]+"%"),datasets:[{data:d.device.map(x=>x[1]),backgroundColor:["#a8112a","#d98a95","#e0b3ba"],borderColor:"#fff",borderWidth:2}]},
+  data:{labels:d.device.map(x=>x[0]+" "+x[1]+"%"),datasets:[{data:d.device.map(x=>x[1]),backgroundColor:["#689ED5","#9cc3e5","#c3ddef"],borderColor:"#fff",borderWidth:2}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:"58%",plugins:{legend:{position:"bottom",labels:{font:{family:FONT,size:12},boxWidth:12,padding:12}}}}});}
 
 function drawRegion(d){destroy("rg");charts.rg=new Chart(document.getElementById("chartRegion"),{type:"bar",
-  data:{labels:d.region.map(x=>x[0]),datasets:[{data:d.region.map(x=>x[1]),backgroundColor:"#a8112a",borderRadius:5,barThickness:16}]},
+  data:{labels:d.region.map(x=>x[0]),datasets:[{data:d.region.map(x=>x[1]),backgroundColor:"#689ED5",borderRadius:5,barThickness:16}]},
   options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{x:{grid:{color:"#f0eae5"},ticks:{font:{family:FONT,size:10},color:"#6b6259"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#2a2320"}}}}});}
+    scales:{x:{grid:{color:"#c9dfec"},ticks:{font:{family:FONT,size:10},color:"#5a6b78"}},y:{grid:{display:false},ticks:{font:{family:FONT,size:12},color:"#22303a"}}}}});}
 
 function drawWorst(d){
   const note=v=>v<50?"ほぼ見られていません":v<90?"見直し候補":"少なめ";
