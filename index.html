@@ -158,6 +158,29 @@
   .internal-note{font-size:12px;color:var(--ink-soft);margin-top:12px;background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:10px 13px}
   .internal-note b{color:var(--accent)}
 
+  /* データ更新ガイド */
+  .guide{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
+  .guide-head h3{font-size:18px;font-weight:800;color:var(--brand-deep)}
+  .guide-head p{font-size:13.5px;color:var(--ink-soft);margin:4px 0 18px}
+  .guide-common{background:var(--brand-soft);border-radius:12px;padding:16px 18px;margin-bottom:18px}
+  .gc-ttl{font-weight:800;font-size:14.5px;color:var(--brand-deep);margin-bottom:8px}
+  .gc-steps{margin:0;padding-left:20px;font-size:13.5px;line-height:1.9}
+  .gc-steps b{color:var(--accent)}
+  .gcard{display:flex;gap:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:11px}
+  .gcard .gc-no{width:30px;height:30px;flex:0 0 auto;background:var(--brand);color:#fff;border-radius:50%;font-weight:800;font-size:15px;display:inline-flex;align-items:center;justify-content:center}
+  .gcard .gc-name{font-weight:800;font-size:14.5px;margin-bottom:5px}
+  .gcard .gc-path{font-size:13px;color:var(--ink-soft);background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:7px 11px;display:inline-block;margin-bottom:6px}
+  .gcard .gc-path .ar{color:var(--accent);font-weight:700;margin:0 3px}
+  .gcard .gc-do{font-size:13.5px}
+  .gcard .gc-do b{color:var(--accent)}
+  .gcard .gc-tip{font-size:12.5px;color:var(--gold);margin-top:6px;font-weight:600}
+  .gcard.gc-todo{background:#fafafa;border-style:dashed}
+  .gcard.gc-todo .gc-no{background:var(--ink-soft)}
+  .gcard.gc-todo .gc-name{color:var(--ink-soft)}
+  .gcard.gc-todo .gc-do{font-size:13px;color:var(--ink-soft);line-height:1.8}
+  .guide-fin{margin-top:14px;background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.8}
+  .guide-fin b{color:var(--accent)}
+
   /* メニューで飛んだ先をふわっと強調 */
   @keyframes flashglow{
     0%{box-shadow:0 0 0 0 rgba(104,158,213,0)}
@@ -187,6 +210,7 @@
       <a data-target="panelWho" href="#">📱 見ている人</a>
       <a data-target="panelInternal" href="#">🏢 社内アクセス</a>
       <a data-target="panelReport" href="#">📄 月次レポート</a>
+      <a data-target="panelGuide" href="#">📝 データ更新のやり方</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
   </aside>
@@ -361,6 +385,75 @@
       <button class="btn btn-ghost" id="resetBtn" style="display:none">サンプルに戻す</button>
     </div>
     <div id="csvStatus" style="margin-top:12px;font-size:13px;color:var(--ink-soft)"></div>
+
+    <!-- データ更新のやり方ガイド -->
+    <div class="guide" id="panelGuide">
+      <div class="guide-head">
+        <h3>📝 データ更新のやり方（月に1回・約5分）</h3>
+        <p>GA4から4枚のCSVを書き出して、上の「GA4のCSVを読み込む」ボタンで取り込むだけです。</p>
+      </div>
+
+      <div class="guide-common">
+        <div class="gc-ttl">🔁 どのCSVも、書き出し方は同じ「3ステップ」</div>
+        <ol class="gc-steps">
+          <li>目的の画面を開く（下の1〜4）</li>
+          <li>画面の<b>右上の共有マーク（↑）</b>を押す</li>
+          <li><b>「ファイルをダウンロード」→「CSV」</b>を選んで保存</li>
+        </ol>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">1</div>
+        <div class="gc-body">
+          <div class="gc-name">ページの人気（よく見られているページ）</div>
+          <div class="gc-path">レポート <span class="ar">▶</span> エンゲージメント <span class="ar">▶</span> ページとスクリーン</div>
+          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div>
+        </div>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">2</div>
+        <div class="gc-body">
+          <div class="gc-name">どこから来たか（入口）</div>
+          <div class="gc-path">レポート <span class="ar">▶</span> トラフィック獲得</div>
+          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div>
+          <div class="gc-tip">💡「集客」ではなく「トラフィック獲得」です</div>
+        </div>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">3</div>
+        <div class="gc-body">
+          <div class="gc-name">機器（スマホ・パソコンの割合）</div>
+          <div class="gc-path">レポート <span class="ar">▶</span> ユーザー <span class="ar">▶</span> テクノロジー <span class="ar">▶</span> ユーザーの環境の詳細</div>
+          <div class="gc-do">→ 表の左上の「ブラウザ ▼」を押して、<b>「デバイス カテゴリ」に変えてから</b>書き出し</div>
+          <div class="gc-tip">💡「ユーザー属性の詳細」と名前が似ているので注意。欲しいのは「テクノロジー」の中です</div>
+        </div>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">4</div>
+        <div class="gc-body">
+          <div class="gc-name">地域（どこから見ているか）</div>
+          <div class="gc-path">レポート <span class="ar">▶</span> ユーザー <span class="ar">▶</span> ユーザー属性 <span class="ar">▶</span> ユーザー属性の詳細</div>
+          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div>
+        </div>
+      </div>
+
+      <div class="gcard gc-todo">
+        <div class="gc-no">5</div>
+        <div class="gc-body">
+          <div class="gc-name">検索の言葉（何と検索して来たか）　※ 今はまだ取得できません</div>
+          <div class="gc-do">このコーポレートサイトは、まだ Search Console（検索データ）とGA4がつながっていないため、この1枚は書き出せません。将来 Search Console を連携すると、メニューに「Search Console ▶ クエリ」が現れ、取得できるようになります。今は4枚だけで十分に動きます。</div>
+        </div>
+      </div>
+
+      <div class="guide-fin">
+        書き出した<b>4枚のCSV</b>を、上の「GA4のCSVを読み込む」ボタンでまとめて選べば完了です。<br>
+        <span style="color:var(--ink-soft);font-size:12.5px">※ GA4の画面はGoogleの仕様変更で名前や場所が変わることがあります。違っていたら、その画面を控えておいてください。</span>
+      </div>
+    </div>
+
 
     <footer>
       <p class="motto">考えるを、ひとりにしない。</p>
