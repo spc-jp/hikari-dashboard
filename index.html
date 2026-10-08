@@ -39,6 +39,8 @@
   .tab:hover{color:var(--brand)}
   .tab.active{background:var(--brand-deep);color:#fff}
   .period{font-size:12.5px;color:var(--ink-soft);margin-top:12px}
+  .period-edit{appearance:none;border:1px solid var(--brand-line);background:#fff;color:var(--brand-deep);font-family:inherit;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:6px;cursor:pointer;margin-left:6px;transition:.15s}
+  .period-edit:hover{background:var(--brand-soft)}
 
   /* KPI */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
@@ -151,6 +153,19 @@
   .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
   @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
 
+  /* 問い合わせの道のり */
+  .contact-flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  .cf-step{background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:12px;padding:12px 18px;text-align:center;min-width:120px}
+  .cf-step .cf-label{font-size:12px;color:var(--ink-soft);font-weight:700}
+  .cf-step .cf-val{font-size:22px;font-weight:800;color:var(--brand-deep);margin-top:2px}
+  .cf-arrow{color:var(--accent);font-size:22px;font-weight:800}
+  .cf-goal{background:var(--accent-soft);border-color:var(--brand-line)}
+  .cf-goal .cf-val{color:var(--accent)}
+  .cf-rate{display:inline-block;background:var(--accent);color:#fff;font-size:13px;font-weight:800;padding:6px 14px;border-radius:999px;margin:4px 0 2px}
+  .contact-note{font-size:12px;color:var(--ink-soft);margin-top:12px;background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:10px 13px;line-height:1.8}
+  .contact-note b{color:var(--accent)}
+  .contact-comment{font-size:14px;margin-top:12px;line-height:1.8}
+
   /* 社内アクセス表示 */
   .internal-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
   .internal-fig{display:flex;align-items:baseline;gap:6px}
@@ -160,6 +175,9 @@
   .internal-share b{font-size:20px;color:var(--accent);font-weight:800}
   .internal-note{font-size:12px;color:var(--ink-soft);margin-top:12px;background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:10px 13px}
   .internal-note b{color:var(--accent)}
+
+  /* サイト名見出し（タブの代わり） */
+  .site-title{font-size:20px;font-weight:800;color:var(--ink);margin-bottom:4px}
 
   /* データ更新ガイド */
   .guide{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;box-shadow:var(--shadow)}
@@ -214,6 +232,7 @@
       <a data-target="panelKw" href="#">🔑 キーワード</a>
       <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
       <a data-target="panelWho" href="#">📱 見ている人</a>
+      <a data-target="panelContact" href="#">✉️ 問い合わせの道のり</a>
       <a data-target="panelInternal" href="#">🏢 社内アクセス</a>
       <a data-target="panelReport" href="#">📄 月次レポート</a>
       <a data-target="panelGuide" href="#">📝 データ更新のやり方</a>
@@ -227,19 +246,15 @@
     <section class="cover" id="cover">
       <div class="cover-inner">
         <div class="cover-tag">光製薬さま ご提案資料</div>
-        <h1 class="cover-title">3サイト分析ダッシュボード</h1>
+        <h1 class="cover-title">サイト分析ダッシュボード</h1>
         <p class="cover-sub">むずかしい専門用語を使わずに、サイトの数字を読み、<br>課題を見つけ、目的に応じた「次の一手」までご提案します。</p>
         <div class="cover-sites">
-          <span>コーポレートサイト</span><span>採用サイト</span><span>ビジョンサイト</span>
+          <span>コーポレートサイト</span>
         </div>
         <div class="cover-how">
-          <div class="how-item"><b>1</b>上のタブで、3つのサイトを切り替え</div>
-          <div class="how-item"><b>2</b>数字はすべて、やさしい言葉に翻訳ずみ</div>
-          <div class="how-item"><b>3</b>画面下で、目的に応じた改善案をご提案</div>
-        </div>
-        <div class="cover-note">
-          ※ この画面は現在、動作イメージ用のサンプル数値を表示しています。<br>
-          実際のGA4データ（CSV）を読み込むと、本物の数字に置き換わります。
+          <div class="how-item"><b>1</b>数字はすべて、やさしい言葉に翻訳ずみ</div>
+          <div class="how-item"><b>2</b>画面下で、目的に応じた改善案をご提案</div>
+          <div class="how-item"><b>3</b>左メニューから各項目にジャンプできます</div>
         </div>
         <div class="cover-foot">Smile Plus Consulting ／ 考えるを、ひとりにしない。</div>
       </div>
@@ -247,21 +262,10 @@
 
     <div class="topbar">
       <div>
-        <div class="tabs" id="tabs">
-          <button class="tab active" data-site="corp">コーポレートサイト</button>
-          <button class="tab" data-site="recruit">採用サイト</button>
-          <button class="tab" data-site="vision">ビジョンサイト</button>
-        </div>
-        <div class="period" id="period"></div>
+        <h2 class="site-title">コーポレートサイト</h2>
+        <div class="period"><span id="period"></span> <button class="period-edit" id="periodEdit" title="期間を変更">✎ 期間を変更</button></div>
       </div>
     </div>
-
-    <!-- 3サイト俯瞰 -->
-    <section class="overview">
-      <h3>3サイト、いまの状態をひと目で</h3>
-      <p class="sub" style="font-size:12px;color:var(--ink-soft);margin-top:2px">クリックすると、そのサイトの詳しい分析と提案に移ります。</p>
-      <div class="ov-grid" id="ovGrid"></div>
-    </section>
 
     <div class="kpis" id="kpis"></div>
 
@@ -329,6 +333,15 @@
         <h3>どの地域から見ているか</h3>
         <p class="sub">お客さまがアクセスしている地域の内訳です。</p>
         <div class="canvas-holder short"><canvas id="chartRegion"></canvas></div>
+      </div>
+    </div>
+
+    <!-- 問い合わせまでの道のり -->
+    <div class="grid">
+      <div class="panel" id="panelContact" style="grid-column:1 / -1">
+        <h3>問い合わせまでの道のり</h3>
+        <p class="sub">お問い合わせページに、どれくらいの人がたどり着いているか。成果に直結する、いちばん大事な数字です。</p>
+        <div id="contactBox"></div>
       </div>
     </div>
 
@@ -486,7 +499,8 @@ const DATA={
     weekday:[["月",4200],["火",4600],["水",4800],["木",4500],["金",4300],["土",1900],["日",1700]],
     device:[["スマホ",58],["パソコン",36],["タブレット",6]],
     region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]],
-    internal:{sessions:1180,note:"IPアドレス除外分（社内ネットワーク）"}},
+    internal:{sessions:1180,note:"IPアドレス除外分（社内ネットワーク）"},
+    contact:{name:"お問い合わせページ",views:356,before:["会社案内","サービス紹介"]}},
   recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -501,7 +515,8 @@ const DATA={
     weekday:[["月",1400],["火",1500],["水",1550],["木",1480],["金",1420],["土",820],["日",760]],
     device:[["スマホ",74],["パソコン",22],["タブレット",4]],
     region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]],
-    internal:{sessions:340,note:"IPアドレス除外分（社内ネットワーク）"}},
+    internal:{sessions:340,note:"IPアドレス除外分（社内ネットワーク）"},
+    contact:{name:"エントリーページ",views:210,before:["募集要項","社員インタビュー"]}},
   vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -516,7 +531,8 @@ const DATA={
     weekday:[["月",1600],["火",1650],["水",1620],["木",1580],["金",1500],["土",680],["日",640]],
     device:[["パソコン",52],["スマホ",42],["タブレット",6]],
     region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]],
-    internal:{sessions:520,note:"IPアドレス除外分（社内ネットワーク）"}}
+    internal:{sessions:520,note:"IPアドレス除外分（社内ネットワーク）"},
+    contact:{name:"資料請求ページ",views:88,before:["企業ビジョン","サステナビリティ"]}}
 };
 
 const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
@@ -627,7 +643,7 @@ const GOAL_TITLE={cv:"🎯 成果を増やすための、次の一手",reach:"�
    ============================================================ */
 function render(site){
   const d=DATA[site];
-  document.getElementById("period").textContent="▼ "+d.period;
+  document.getElementById("period").textContent="▼ "+getPeriod(d);
 
   // KPI
   document.getElementById("kpis").innerHTML=d.kpi.map(([plain,num,unit,delta,term])=>{
@@ -655,7 +671,7 @@ function render(site){
   }).join("");
 
   drawTrend(d);drawPages(d);drawSource(d);
-  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);drawInternal(d);
+  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);drawContact(d);drawInternal(d);
   renderStrategist(d);
   renderOverview();
 }
@@ -676,22 +692,9 @@ function renderAdvice(){
 }
 
 function renderOverview(){
-  const html=Object.entries(DATA).map(([key,d])=>{
-    const st=judgeState(d);
-    const cvSign=d.kpi[2][3]>=0?"+":"";
-    return `<div class="ov" data-site="${key}">
-      <div class="ov-name">${d.label}</div>
-      <span class="ov-badge badge ${st.cls}" style="padding:3px 10px;font-size:11.5px">${st.name}</span>
-      <div class="ov-line">訪問 ${d.kpi[1][3]>=0?"+":""}${d.kpi[1][3]}％ ／ 成果 ${cvSign}${d.kpi[2][3]}％</div>
-    </div>`;
-  }).join("");
-  document.getElementById("ovGrid").innerHTML=html;
-  document.querySelectorAll(".ov").forEach(el=>el.onclick=()=>{
-    const s=el.dataset.site;
-    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.site===s));
-    current=s;render(s);
-    document.querySelector(".strategist").scrollIntoView({behavior:"smooth",block:"center"});
-  });
+  // 3サイト俯瞰は廃止（コーポレート1本化）。要素があるときだけ描画する保険。
+  const grid=document.getElementById("ovGrid");
+  if(!grid) return;
 }
 
 /* グラフ */
@@ -740,6 +743,36 @@ function drawWorst(d){
   document.getElementById("worstBody").innerHTML=d.worst.map(([p,v])=>`<tr><td>${p}</td><td class="n">${v}</td><td style="color:var(--ink-soft);font-size:12px">${note(v)}</td></tr>`).join("");
 }
 
+function drawContact(d){
+  const box=document.getElementById("contactBox");
+  if(!box) return;
+  if(!d.contact||!d.contact.views){
+    box.innerHTML='<p style="color:var(--ink-soft);font-size:13.5px">お問い合わせページのデータがまだありません。ページ別のCSVを読み込むと表示されます。</p>';
+    return;
+  }
+  const visits=toNum(d.kpi[1][1].replace(/,/g,""))||0;       // 訪問回数
+  const cv=d.contact.views;
+  const rate=visits>0?(cv/visits*100):0;
+  const rateStr=(Math.round(rate*10)/10);
+  const before=(d.contact.before||[]).join("」「");
+
+  let comment;
+  if(rate>=4) comment=`訪問の約${rateStr}%が${d.contact.name}までたどり着いています。良い流れです。この手前でよく読まれている「${before}」に、さらに問い合わせへの案内を置くと、もう一段伸ばせます😊`;
+  else if(rate>=2) comment=`訪問の約${rateStr}%が${d.contact.name}に到達。悪くない数字です。手前の「${before}」に、問い合わせボタンや「お気軽にどうぞ」の一言を添えると、到達率が上がりやすくなります。`;
+  else comment=`${d.contact.name}への到達が約${rateStr}%とやや少なめです。よく読まれている「${before}」から問い合わせへの導線（ボタン・リンク）が分かりやすいか、一度見直す価値があります。`;
+
+  box.innerHTML=`
+    <div class="contact-flow">
+      <div class="cf-step"><div class="cf-label">サイトへの訪問</div><div class="cf-val">${visits.toLocaleString()}</div></div>
+      <span class="cf-arrow">▶</span>
+      <div class="cf-step cf-goal"><div class="cf-label">${d.contact.name}に到達</div><div class="cf-val">${cv.toLocaleString()}</div></div>
+      <span class="cf-arrow">＝</span>
+      <div><span class="cf-rate">到達率 約${rateStr}%</span></div>
+    </div>
+    <div class="contact-comment">🧭 ${comment}</div>
+    <div class="contact-note"><b>※ これは「${d.contact.name}が見られた回数」です。</b>実際に問い合わせを送信した件数ではありません（見ただけで離脱した人も含みます）。正確な送信数は、今後コンバージョン設定を行うと測れるようになります。</div>`;
+}
+
 function drawInternal(d){
   const box=document.getElementById("internalBox");
   if(!d.internal||!d.internal.sessions){
@@ -767,11 +800,15 @@ function drawInternal(d){
 document.getElementById("glossaryBody").innerHTML=GLOSSARY.map(([t,p])=>`<tr><th>${t}</th><td>${p}</td></tr>`).join("");
 
 /* イベント */
-document.getElementById("tabs").addEventListener("click",e=>{
-  const b=e.target.closest(".tab");if(!b)return;
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  b.classList.add("active");current=b.dataset.site;render(current);
-});
+/* タブは廃止（コーポレート1本化）。将来タブを戻す場合に備え、要素がある時だけ配線 */
+const tabsEl=document.getElementById("tabs");
+if(tabsEl){
+  tabsEl.addEventListener("click",e=>{
+    const b=e.target.closest(".tab");if(!b)return;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    b.classList.add("active");current=b.dataset.site;render(current);
+  });
+}
 document.getElementById("goalSwitch").addEventListener("click",e=>{
   const b=e.target.closest(".goal");if(!b)return;
   document.querySelectorAll(".goal").forEach(g=>g.classList.remove("active"));
@@ -852,7 +889,13 @@ function ingestCSV(text){
     if(arr.length){
       d.pages=arr.slice(0,5).map(([p,v])=>[shorten(p),v]);
       d.worst=arr.slice(-5).reverse().map(([p,v])=>[shorten(p),v]);
-      return "ページ別データを反映しました（上位・下位）";
+      // お問い合わせページを自動検出（contact/問い合わせ/entry/資料請求 などの名前）
+      const cHit=arr.find(([p])=>/contact|問い?合わせ|お問|entry|エントリー|資料請求|申込|申し込/i.test(p));
+      if(cHit && d.contact){
+        d.contact.views=cHit[1];
+        d.contact.name=shorten(cHit[0]);
+      }
+      return "ページ別データを反映しました（上位・下位・問い合わせ到達）";
     }
   }
   // チャネル（流入元）レポート
@@ -941,6 +984,27 @@ function parseCSV(text){
 }
 function toNum(v){if(v==null)return 0;const n=parseFloat(String(v).replace(/[,%¥\s"]/g,""));return isNaN(n)?0:n;}
 function shorten(s){s=String(s);return s.length>16?s.slice(0,15)+"…":s;}
+
+/* 期間表示：記憶した期間があれば優先、なければデータの期間 */
+function getPeriod(d){
+  try{
+    const saved=localStorage.getItem("hikari_period");
+    if(saved) return saved;
+  }catch(e){}
+  return d.period;
+}
+/* 期間の編集 */
+document.getElementById("periodEdit").addEventListener("click",()=>{
+  const now=getPeriod(DATA[current]);
+  const input=prompt("表示する期間を入力してください。\n（例：2026/8/14 〜 2026/9/10 ・ 過去28日間）",now);
+  if(input===null) return;            // キャンセル
+  const val=input.trim();
+  try{
+    if(val==="") localStorage.removeItem("hikari_period");  // 空ならサンプルに戻す
+    else localStorage.setItem("hikari_period",val);
+  }catch(e){}
+  document.getElementById("period").textContent="▼ "+getPeriod(DATA[current]);
+});
 
 /* ロゴ：クリックで先頭に戻る */
 document.getElementById("logoHome").addEventListener("click",()=>{
