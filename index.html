@@ -39,8 +39,8 @@
   .tab:hover{color:var(--brand)}
   .tab.active{background:var(--brand-deep);color:#fff}
   .period{font-size:12.5px;color:var(--ink-soft);margin-top:12px}
-  .period-edit{appearance:none;border:1px solid var(--brand-line);background:#fff;color:var(--brand-deep);font-family:inherit;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:6px;cursor:pointer;margin-left:6px;transition:.15s}
-  .period-edit:hover{background:var(--brand-soft)}
+  .period-select{appearance:auto;border:1px solid var(--brand-line);background:#fff;color:var(--brand-deep);font-family:inherit;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;cursor:pointer;margin-left:6px}
+  .period-select:hover{background:var(--brand-soft)}
 
   /* KPI */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
@@ -276,7 +276,19 @@
     <div class="topbar">
       <div>
         <h2 class="site-title">コーポレートサイト</h2>
-        <div class="period"><span id="period"></span> <button class="period-edit" id="periodEdit" title="期間を変更">✎ 期間を変更</button></div>
+        <div class="period">
+          <span id="period"></span>
+          <select class="period-select" id="periodSelect" title="分析期間を選ぶ">
+            <option value="">— 期間を選ぶ —</option>
+            <option value="7">過去7日間</option>
+            <option value="28">過去28日間</option>
+            <option value="30">過去30日間</option>
+            <option value="90">過去90日間</option>
+            <option value="thisMonth">今月</option>
+            <option value="lastMonth">先月</option>
+            <option value="custom">自由入力…</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -1042,17 +1054,52 @@ function getPeriod(d){
   }catch(e){}
   return d.period;
 }
-/* 期間の編集 */
-document.getElementById("periodEdit").addEventListener("click",()=>{
-  const now=getPeriod(DATA[current]);
-  const input=prompt("表示する期間を入力してください。\n（例：2026/8/14 〜 2026/9/10 ・ 過去28日間）",now);
-  if(input===null) return;            // キャンセル
-  const val=input.trim();
-  try{
-    if(val==="") localStorage.removeItem("hikari_period");  // 空ならサンプルに戻す
-    else localStorage.setItem("hikari_period",val);
-  }catch(e){}
-  document.getElementById("period").textContent="▼ "+getPeriod(DATA[current]);
+/* 日付を「YYYY/M/D」形式に */
+function fmtDate(d){ return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate(); }
+/* 期間の種類 → 表示テキストを計算（今日基準） */
+function buildPeriodText(kind){
+  const today=new Date();
+  const end=new Date(today); end.setDate(end.getDate()-1);  // GA4は前日までが基本
+  let start, label;
+  if(kind==="7"||kind==="28"||kind==="30"||kind==="90"){
+    const days=parseInt(kind);
+    start=new Date(end); start.setDate(start.getDate()-(days-1));
+    label="過去"+days+"日間";
+    return fmtDate(start)+" 〜 "+fmtDate(end)+" ・ "+label;
+  }
+  if(kind==="thisMonth"){
+    start=new Date(today.getFullYear(),today.getMonth(),1);
+    const e=new Date(today); e.setDate(e.getDate()-1);
+    return fmtDate(start)+" 〜 "+fmtDate(e)+" ・ 今月";
+  }
+  if(kind==="lastMonth"){
+    start=new Date(today.getFullYear(),today.getMonth()-1,1);
+    const lastEnd=new Date(today.getFullYear(),today.getMonth(),0);
+    return fmtDate(start)+" 〜 "+fmtDate(lastEnd)+" ・ 先月";
+  }
+  return null;
+}
+/* プルダウンで期間を選ぶ */
+document.getElementById("periodSelect").addEventListener("change",function(){
+  const kind=this.value;
+  if(kind==="") return;
+  let text;
+  if(kind==="custom"){
+    const now=getPeriod(DATA[current]);
+    const input=prompt("表示する期間を入力してください。\n（例：2026/8/14 〜 2026/9/10 ・ 過去28日間）",now);
+    this.value="";                     // 選択を元に戻す
+    if(input===null) return;
+    const v=input.trim();
+    if(v===""){ try{localStorage.removeItem("hikari_period");}catch(e){} document.getElementById("period").textContent="▼ "+getPeriod(DATA[current]); return; }
+    text=v;
+  }else{
+    text=buildPeriodText(kind);
+    this.value="";                     // 選択を元に戻す（表示は period 側に出る）
+  }
+  if(text){
+    try{localStorage.setItem("hikari_period",text);}catch(e){}
+    document.getElementById("period").textContent="▼ "+text;
+  }
 });
 
 /* ロゴ：クリックで先頭に戻る */
