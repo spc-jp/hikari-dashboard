@@ -229,6 +229,8 @@
     body{background:#fff}.main{padding:0}
     .panel,.kpi,.strategist,.overview{box-shadow:none;break-inside:avoid}
   }
+.gsc-scroll{overflow-x:auto}.gsc-scroll table{min-width:620px}.gsc-scroll td:first-child{overflow-wrap:anywhere;max-width:320px}#gscPeriod,#gscFilters,#gscTotals,#gscStatus{font-size:12px;overflow-wrap:anywhere;margin:10px 0}#ga4Provenance{font-size:12px;color:var(--accent)}
+@media(max-width:600px){.main{padding:16px 12px 40px}.tabs{flex-wrap:wrap}.tab{padding:8px 10px;font-size:12px}.cover{padding:24px 18px}.panel{padding:16px 12px}.kpi{padding:12px 10px}.kpi .num{font-size:22px}#gscInput{max-width:100%}}
 </style>
 </head>
 <body>
@@ -273,9 +275,24 @@
       </div>
     </section>
 
+<section class="panel" id="panelGSC" style="margin-bottom:20px">
+<h3>Google Search Console · 検索パフォーマンス</h3>
+<p class="sub">GSCはGoogle検索結果での指標です。GA4の閲覧数・訪問数・成果とは別の実データとして表示します。未取得はゼロではありません。</p>
+<label>読込先 <select id="gscSlot"><option value="current">現在期間</option><option value="previous">比較期間</option></select></label>
+<label class="btn btn-ghost">GSC CSVを選択 <input id="gscInput" type="file" accept=".csv,text/csv" multiple></label>
+<button class="btn btn-ghost" id="gscClear">このサイトのGSCを消去</button>
+<p id="gscStatus" role="status">GSC実データ未取得。デモ値は使用しません。</p>
+<p id="gscPeriod"></p><p id="gscFilters"></p>
+<div class="kpis" id="gscKpis"></div>
+<div class="canvas-holder"><canvas id="chartGSC" aria-label="GSCクリック数と表示回数の日別推移"></canvas></div>
+<p id="gscTotals"></p>
+<p class="sub">総計は日付CSVのみから計算し、クエリ・ページ明細を足し合わせません。CTRはクリック÷表示回数、掲載順位は表示回数による加重平均（CSVの丸めにより誤差があります）。匿名化されたクエリ、出力行数制限、プロパティ／ページ単位の集計差により明細合計とGoogleの総計が一致しないことがあります。<a href="https://support.google.com/webmasters/answer/12919797?hl=ja" target="_blank" rel="noopener">Googleの出力仕様</a> · <a href="https://developers.google.com/search/blog/2022/10/performance-data-deep-dive?hl=ja" target="_blank" rel="noopener">集計と制限</a></p>
+<h3>検索キーワードランキング（クリック順・上位50行）</h3><div id="gscQueries"></div>
+<h3>ページ別改善候補（表示回数順・上位50行）</h3><p class="sub">順位10位超・CTR 2%未満を参考目安にします。成果や原因を断定するものではありません。</p><div id="gscPages"></div>
+<p class="sub">検索クエリ／ページ／日付／フィルタCSVを同じサイト・期間・検索条件で選択してください。比較は別枠に読み込みます。比較差は期間合計の差で、日数が異なる場合は単純比較できません。フィルタCSVは条件表示用で、再集計はしません。CSVはブラウザ内だけで処理し、外部送信・永続保存しません。再読み込みで消去されます。</p></section>
     <div class="topbar">
       <div>
-        <h2 class="site-title">コーポレートサイト</h2>
+        <div class="tabs" id="tabs"><button class="tab active" data-site="corp">コーポレート</button><button class="tab" data-site="recruit">採用</button><button class="tab" data-site="vision">ビジョン</button></div><h2 class="site-title" id="siteTitle">コーポレートサイト</h2><p id="ga4Provenance" role="status"></p>
         <div class="period">
           <span id="period"></span>
           <select class="period-select" id="periodSelect" title="分析期間を選ぶ">
@@ -704,6 +721,9 @@ const GOAL_TITLE={cv:"🎯 成果を増やすための、次の一手",reach:"�
    ============================================================ */
 function render(site){
   const d=DATA[site];
+  document.getElementById("siteTitle").textContent=d.label;
+  document.getElementById("ga4Provenance").textContent="GA4欄：未読込の項目・サイト参謀はデモです。CSV反映済み項目："+(GA4_LOADED[site]?.join(" ／ ")||"なし")+"。GSC実データは専用欄に表示します。";
+  renderGSC();
   document.getElementById("period").textContent="▼ "+getPeriod(d);
 
   // KPI
@@ -714,7 +734,7 @@ function render(site){
     return `<div class="kpi"><div class="plain">${plain}</div>
       <div class="num">${num}<span class="u">${unit}</span></div>
       <div class="delta ${good?"up":"down"}">${sign}${delta}${isRank?"":"%"} 前週比</div>
-      <div class="term">GA4での呼び名：${term}</div></div>`;
+      <div class="term">${isRank?"GSCデモ指標":"GA4での呼び名"}：${term}</div></div>`;
   }).join("");
 
   // ディレクトリ
@@ -882,17 +902,19 @@ document.getElementById("goalSwitch").addEventListener("click",e=>{
    ============================================================ */
 const fileInput=document.getElementById("fileInput");
 const csvStatus=document.getElementById("csvStatus");
+const GA4_LOADED={};
 document.getElementById("csvBtn").onclick=()=>fileInput.click();
 document.getElementById("resetBtn").onclick=()=>location.reload();
 
 fileInput.onchange=e=>{
-  const files=[...e.target.files]; if(!files.length)return;
+  const site=current; const files=[...e.target.files]; if(!files.length)return;
   let done=0; const msgs=[];
   files.forEach(f=>{
     const r=new FileReader();
     r.onload=ev=>{
-      const res=ingestCSV(ev.target.result);
-      msgs.push("・"+f.name+"："+res);
+      let res;try{const shown=current;current=site;try{res=ingestCSV(ev.target.result);}finally{current=shown;}}catch(err){res="読込中止："+err.message;}
+      if(res.includes("反映しました")){GA4_LOADED[site] ||= [];if(!GA4_LOADED[site].includes(res))GA4_LOADED[site].push(res);}
+      msgs.push("・"+escapeHTML(f.name)+"："+escapeHTML(res));
       if(++done===files.length){
         render(current);
         document.getElementById("resetBtn").style.display="";
@@ -906,6 +928,7 @@ fileInput.onchange=e=>{
 
 /* CSVを解析して、現在のサイトDATAに反映。戻り値は結果メッセージ */
 function ingestCSV(text){
+  if(readGSC(text))return "GSC CSVは専用のGSC読込欄から読み込んでください（GA4未変更）";
   const rows=parseCSV(text);
   if(rows.length<2) return "データが読み取れませんでした";
   // ヘッダー行を探す（GA4レポートCSVは先頭に # コメントや空行が入る）
@@ -914,7 +937,7 @@ function ingestCSV(text){
   hi=rows.findIndex(r=>r.filter(x=>x!=="").length>=2);
   if(hi<0) return "表の見出しが見つかりませんでした";
   const header=rows[hi].map(h=>h.toLowerCase());
-  const body=rows.slice(hi+1).filter(r=>r.filter(x=>x!=="").length>=2);
+  const body=rows.slice(hi+1).filter(r=>r.filter(x=>x!=="").length>=2).map(r=>r.map(escapeHTML));
   const d=DATA[current];
   const col=k=>header.findIndex(h=>k.some(x=>h.includes(x)));
 
@@ -1032,16 +1055,21 @@ function translateChannel(raw){
 
 /* CSVパーサ（ダブルクオート・BOM・#コメント対応） */
 function parseCSV(text){
-  text=text.replace(/^\uFEFF/,"");
-  const lines=text.split(/\r?\n/).filter(l=>l.trim()!=="" && !l.trim().startsWith("#"));
-  return lines.map(line=>{
-    const out=[];let cur="";let q=false;
-    for(let i=0;i<line.length;i++){const c=line[i];
-      if(c==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
-      else if(c===','&&!q){out.push(cur);cur="";}
-      else cur+=c;}
-    out.push(cur);return out.map(s=>s.trim());
-  });
+  const rows=[];let row=[],cell="",quoted=false;
+  text=String(text).replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++;}else quoted=!quoted;}
+    else if(c===','&&!quoted){row.push(cell.trim());cell="";}
+    else if((c==='\n'||c==='\r')&&!quoted){
+      if(c==='\r'&&text[i+1]==='\n')i++;
+      row.push(cell.trim());if(row.some(Boolean)&&!row[0].startsWith("#"))rows.push(row);
+      row=[];cell="";
+    }else cell+=c;
+  }
+  if(quoted)throw new Error("引用符が閉じていません");
+  row.push(cell.trim());if(row.some(Boolean)&&!row[0].startsWith("#"))rows.push(row);
+  return rows;
 }
 function toNum(v){if(v==null)return 0;const n=parseFloat(String(v).replace(/[,%¥\s"]/g,""));return isNaN(n)?0:n;}
 function shorten(s){s=String(s);return s.length>16?s.slice(0,15)+"…":s;}
@@ -1127,6 +1155,102 @@ document.querySelector(".nav").addEventListener("click",e=>{
   void el.offsetWidth;           // アニメ再生をリセットするおまじない
   el.classList.add("flash");
 });
+
+
+/* GSC: browser memory only; one snapshot per site, period and dimension. */
+const GSC={};
+function gscNumber(v){
+  if(v==null||String(v).trim()==="")return null;
+  const n=Number(String(v).replace(/[,%\s]/g,""));
+  return Number.isFinite(n)&&n>=0?n:null;
+}
+function readGSC(text){
+  const rows=parseCSV(text), norm=s=>s.toLowerCase().replace(/\s/g,"");
+  const aliases={query:["検索クエリ","上位のクエリ","クエリ","topqueries","queries","query"],
+    page:["ページ","上位のページ","toppages","pages","page"],date:["日付","date"],
+    clicks:["クリック数","クリック","clicks"],impressions:["表示回数","impressions"],
+    ctr:["ctr","クリック率"],position:["平均掲載順位","掲載順位","平均順位","position","averageposition"]};
+  const hi=rows.findIndex(r=>r.some(x=>aliases.clicks.includes(norm(x)))&&r.some(x=>aliases.impressions.includes(norm(x))));
+  if(hi<0){
+    const h=rows[0]?.map(norm)||[];
+    if(h.some(x=>["フィルタ","filter","filters"].includes(x)))return {type:"filters",rows:rows.slice(1)};
+    return null;
+  }
+  const h=rows[hi].map(norm), col=k=>h.findIndex(x=>aliases[k].includes(x));
+  const type=["query","page","date"].find(k=>col(k)>=0);
+  if(!type)throw new Error("GSCの明細種類を判別できません");
+  const seen=new Map(), result=[];
+  for(const r of rows.slice(hi+1)){
+    if(!r.some(Boolean))continue;
+    const key=r[col(type)];
+    if(!key)throw new Error("GSCの行ラベルが空です");
+    const clicks=gscNumber(r[col("clicks")]),impressions=gscNumber(r[col("impressions")]);
+    const position=gscNumber(r[col("position")]),rawCtr=r[col("ctr")];
+    if(clicks===null||impressions===null||position===null||clicks>impressions)throw new Error("GSCに欠損・不正な指標があります");
+    const ctr=gscNumber(rawCtr);
+    if(ctr===null||(/%/.test(rawCtr)&&ctr>100)||(!/%/.test(rawCtr)&&ctr>100))throw new Error("GSCのCTRが欠損または不正です");
+    const item={key,clicks,impressions,position,ctr:impressions?clicks/impressions*100:null};
+    if(type==="date"&&!/^\d{4}-\d{2}-\d{2}$/.test(key))throw new Error("日付はYYYY-MM-DD形式が必要です");
+    if(seen.has(key)){
+      if(JSON.stringify(seen.get(key))!==JSON.stringify(item))throw new Error("同じ行ラベルの値が異なります。重複集計を避けるため読み込みを中止しました");
+      continue;
+    }
+    seen.set(key,item);result.push(item);
+  }
+  if(!result.length)throw new Error("GSCにデータ行がありません");
+  return {type,rows:result};
+}
+function gscTotal(report){
+  if(!report)return null;
+  const clicks=report.rows.reduce((n,r)=>n+r.clicks,0),impressions=report.rows.reduce((n,r)=>n+r.impressions,0);
+  return {clicks,impressions,ctr:impressions?clicks/impressions*100:null,
+    position:impressions?report.rows.reduce((n,r)=>n+r.position*r.impressions,0)/impressions:null};
+}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function gscFormat(v,decimal=false){return v==null?"未取得":v.toLocaleString("ja-JP",{maximumFractionDigits:decimal?2:0});}
+function renderGSC(){
+  const state=GSC[current]||{}, a=state.current||{},b=state.previous||{};
+  const total=gscTotal(a.date),prev=gscTotal(b.date);
+  document.getElementById("gscKpis").innerHTML=[["クリック数","clicks"],["表示回数","impressions"],["CTR (%)","ctr"],["平均掲載順位","position"]].map(([label,k])=>{
+    const delta=total&&prev&&total[k]!=null&&prev[k]!=null?total[k]-prev[k]:null;
+    return '<div class="kpi"><div class="plain">'+label+'</div><div class="num">'+gscFormat(total?.[k],k==="ctr"||k==="position")+'</div><div class="term">GSC 実データ・日付CSV総計</div><div>前期間差：'+(delta==null?"比較未取得":gscFormat(delta,true)+(k==="ctr"?" ポイント":k==="position"?" 位":""))+'</div></div>';
+  }).join("");
+  const range=r=>r? [...r.rows].map(x=>x.key).sort().filter((_,i,arr)=>i===0||i===arr.length-1).join(" ～ "):"未取得";
+  document.getElementById("gscPeriod").textContent="現在："+range(a.date)+" ／ 比較："+range(b.date)+"。CSVは選択した期間枠の種類別に置換します。期間・プロパティ・フィルタを揃えてください。";
+  const table=(report,pages)=>!report?"<p>未取得：対応するCSVを読み込んでください。</p>":'<div class="gsc-scroll"><table><thead><tr><th>'+(pages?"ページ":"検索キーワード")+'</th><th>クリック</th><th>表示回数</th><th>CTR</th><th>掲載順位</th>'+(pages?"<th>改善候補（参考）</th>":"")+'</tr></thead><tbody>'+
+    [...report.rows].sort((x,y)=>pages?y.impressions-x.impressions:y.clicks-x.clicks).slice(0,50).map(r=>'<tr><td>'+escapeHTML(r.key)+'</td><td>'+gscFormat(r.clicks)+'</td><td>'+gscFormat(r.impressions)+'</td><td>'+gscFormat(r.ctr,true)+'%</td><td>'+gscFormat(r.position,true)+'</td>'+(pages?'<td>'+(r.impressions===0?"判断材料なし":r.position>10?"内容・検索意図の見直し":r.ctr<2?"タイトル・説明文の見直し":"維持・関連ページへの導線確認")+'</td>':"")+'</tr>').join("")+'</tbody></table></div>';
+  document.getElementById("gscQueries").innerHTML=table(a.query,false);
+  document.getElementById("gscPages").innerHTML=table(a.page,true);
+  document.getElementById("gscFilters").textContent="現在のフィルタCSV："+(a.filters?a.filters.rows.map(r=>r.join("：")).join(" ／ "):"未取得（条件一致は未確認）")+" ／ 比較："+(b.filters?b.filters.rows.map(r=>r.join("：")).join(" ／ "):"未取得");
+  document.getElementById("gscTotals").textContent=["query","page"].map(k=>{
+    const t=gscTotal(a[k]);return (k==="query"?"クエリ":"ページ")+"明細合計："+(t?gscFormat(t.clicks)+"クリック / "+gscFormat(t.impressions)+"表示":"未取得")+(t&&total&&(t.clicks!==total.clicks||t.impressions!==total.impressions)?"（日付総計と不一致）":"");
+  }).join(" ／ ");
+  if(charts.gsc)charts.gsc.destroy();
+  if(a.date&&typeof Chart!=="undefined"){
+    const r=[...a.date.rows].sort((x,y)=>x.key.localeCompare(y.key));
+    charts.gsc=new Chart(document.getElementById("chartGSC"),{type:"line",data:{labels:r.map(x=>x.key),datasets:[{label:"GSC クリック数",data:r.map(x=>x.clicks),borderColor:"#3f6fa0",yAxisID:"clicks"},{label:"GSC 表示回数",data:r.map(x=>x.impressions),borderColor:"#c8102e",yAxisID:"impressions"}]},options:{responsive:true,maintainAspectRatio:false,scales:{clicks:{position:"left"},impressions:{position:"right",grid:{drawOnChartArea:false}}}}});
+  }
+}
+document.getElementById("gscInput").addEventListener("change",async e=>{
+  const site=current,slot=document.getElementById("gscSlot").value,files=[...e.target.files],batch={};
+  try{
+    for(const f of files){
+      const report=readGSC(await f.text());
+      if(!report)throw new Error(f.name+"：GSC CSVとして判別できません");
+      if(batch[report.type]){
+        if(JSON.stringify(batch[report.type])===JSON.stringify(report))continue;
+        throw new Error("同じ種類の異なるCSVは一括読込できません。期間ごとに1ファイルを選んでください");
+      }
+      batch[report.type]=report;
+    }
+    GSC[site] ||= {};GSC[site][slot] ||= {};
+    Object.assign(GSC[site][slot],batch);
+    document.getElementById("gscStatus").textContent=DATA[site].label+"・"+(slot==="current"?"現在期間":"比較期間")+"：実データを読み込みました（重複加算なし）";
+    if(site===current)renderGSC();
+  }catch(err){document.getElementById("gscStatus").textContent=err.message;}
+  e.target.value="";
+});
+document.getElementById("gscClear").onclick=()=>{delete GSC[current];renderGSC();document.getElementById("gscStatus").textContent="このサイトのGSC実データを消去しました";};
 
 render("corp");
 </script>
