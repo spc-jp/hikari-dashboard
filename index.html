@@ -221,6 +221,7 @@
   .group-head .gh-icon{width:34px;height:34px;flex:0 0 auto;background:var(--brand);color:#fff;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
   .group-head .gh-text{font-size:17px;font-weight:800;color:var(--ink)}
   .group-head .gh-text small{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:1px}
+  .gh-source{display:inline-block;font-size:10.5px;font-weight:700;color:var(--ink-soft);background:#eef2f6;border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-top:4px}
   .group-head .gh-line{flex:1;height:1px;background:var(--line)}
   /* 重要グループは赤アクセント */
   .group-head.key .gh-icon{background:var(--accent)}
@@ -334,7 +335,7 @@
     <!-- ========== グループ：成果（最重要） ========== -->
     <div class="group-head key">
       <span class="gh-icon">✉️</span>
-      <span class="gh-text">成果<small>いちばん大事 ── 問い合わせにつながっているか</small></span>
+      <span class="gh-text">成果<small>いちばん大事 ── 問い合わせにつながっているか</small><span class="gh-source">データの出どころ：GA4</span></span>
       <span class="gh-line"></span>
     </div>
 
@@ -349,7 +350,7 @@
     <!-- ========== グループ：集客 ========== -->
     <div class="group-head">
       <span class="gh-icon">📈</span>
-      <span class="gh-text">集客<small>どれだけの人が、どこから来たか</small></span>
+      <span class="gh-text">集客<small>どれだけの人が、どこから来たか</small><span class="gh-source">データの出どころ：GA4</span></span>
       <span class="gh-line"></span>
     </div>
 
@@ -384,7 +385,7 @@
     <!-- ========== Google検索（サーチコンソール）分析 ========== -->
     <div class="group-head">
       <span class="gh-icon">🔍</span>
-      <span class="gh-text">Google検索での状況<small>検索で、どう見つけてもらえているか（サーチコンソール）</small></span>
+      <span class="gh-text">検索で、どう見つけてもらえているか<small>Google検索での表示・クリック・順位</small><span class="gh-source">データの出どころ：サーチコンソール</span></span>
       <span class="gh-line"></span>
     </div>
 
@@ -435,7 +436,7 @@
     <!-- ========== グループ：中身 ========== -->
     <div class="group-head">
       <span class="gh-icon">📄</span>
-      <span class="gh-text">中身<small>サイトの中で、何が見られているか</small></span>
+      <span class="gh-text">中身<small>サイトの中で、何が見られているか</small><span class="gh-source">データの出どころ：GA4</span></span>
       <span class="gh-line"></span>
     </div>
 
@@ -461,7 +462,7 @@
     <!-- ========== グループ：見ている人 ========== -->
     <div class="group-head">
       <span class="gh-icon">👤</span>
-      <span class="gh-text">見ている人<small>どんな人が、いつ、どの機器で見ているか</small></span>
+      <span class="gh-text">見ている人<small>どんな人が、いつ、どの機器で見ているか</small><span class="gh-source">データの出どころ：GA4</span></span>
       <span class="gh-line"></span>
     </div>
 
@@ -502,7 +503,7 @@
     <!-- ========== グループ：総合提案 ========== -->
     <div class="group-head key">
       <span class="gh-icon">🧭</span>
-      <span class="gh-text">総合提案<small>すべてを踏まえた、次の一手</small></span>
+      <span class="gh-text">総合提案<small>すべてを踏まえた、次の一手</small><span class="gh-source">データの出どころ：GA4 ＋ サーチコンソール</span></span>
       <span class="gh-line"></span>
     </div>
 
