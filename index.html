@@ -153,6 +153,42 @@
   .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
   @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
 
+  /* データ読み込みエリア */
+  .data-load{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow)}
+  .dl-status{font-size:14px;font-weight:800;padding:10px 16px;border-radius:10px;margin-bottom:16px;background:var(--gold);color:#fff}
+  .dl-status.live{background:var(--up)}
+  .dl-buttons{display:flex;gap:12px;flex-wrap:wrap}
+  .btn-load{appearance:none;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:800;padding:16px 22px;border-radius:12px;transition:.15s;flex:1;min-width:200px}
+  .btn-load-ga4{background:var(--brand);color:#fff}.btn-load-ga4:hover{background:var(--brand-deep)}
+  .btn-load-gsc{background:var(--brand-deep);color:#fff}.btn-load-gsc:hover{background:#2f5580}
+  .btn-load-check{background:#fff;color:var(--brand-deep);border:2px solid var(--brand-line)}.btn-load-check:hover{background:var(--brand-soft)}
+  .btn-load-reset{background:#fff;color:var(--ink-soft);border:2px solid var(--line)}.btn-load-reset:hover{background:#f4f4f4}
+  #csvStatus{margin-top:16px}
+  .load-result{font-size:13.5px;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:10px;line-height:1.9}
+  .load-result.ok{border-left:4px solid var(--up);background:#f3faf5}
+  .load-result.ng{border-left:4px solid var(--down);background:#fdf3f1}
+  .load-result .lr-ttl{font-weight:800;margin-bottom:6px}
+  .load-result .lr-row{color:var(--ink-soft)}
+  .load-result .lr-row b{color:var(--ink)}
+  .warn-box{font-size:13.5px;background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:10px;padding:12px 15px;margin-top:10px;line-height:1.8}
+  .warn-box b{color:var(--accent)}
+  @media(max-width:720px){.btn-load{min-width:100%}}
+
+  /* サーチコンソール：4つの大きな数字 */
+  .gsc-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .gsc-kpi{background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:12px;padding:16px 18px;text-align:center}
+  .gsc-kpi .gk-label{font-size:13px;color:var(--ink-soft);font-weight:700}
+  .gsc-kpi .gk-val{font-size:28px;font-weight:800;color:var(--brand-deep);margin:4px 0 2px;font-feature-settings:"tnum"}
+  .gsc-kpi .gk-sub{font-size:11px;color:var(--gold)}
+  /* 改善候補 */
+  .chance{border:1px solid var(--brand-line);border-left:4px solid var(--accent);border-radius:10px;padding:13px 16px;margin-bottom:10px}
+  .chance .ch-word{font-weight:800;font-size:14.5px;color:var(--ink)}
+  .chance .ch-nums{font-size:12.5px;color:var(--ink-soft);margin:4px 0}
+  .chance .ch-why{font-size:13px;color:var(--brand-deep);background:var(--brand-soft);border-radius:8px;padding:8px 11px;margin-top:6px}
+  .gsc-note{font-size:12px;color:var(--ink-soft);margin-top:12px;background:#fafcfe;border:1px solid var(--line);border-radius:8px;padding:10px 13px;line-height:1.8}
+  .url-cell{font-size:12px;color:var(--ink-soft);word-break:break-all}
+  @media(max-width:720px){.gsc-kpis{grid-template-columns:repeat(2,1fr)}}
+
   /* 問い合わせの道のり */
   .contact-flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
   .cf-step{background:var(--brand-soft);border:1px solid var(--brand-line);border-radius:12px;padding:12px 18px;text-align:center;min-width:120px}
@@ -243,6 +279,7 @@
       <a data-target="panelContact" href="#">✉️ 問い合わせの道のり</a>
       <a data-target="panelSource" href="#">📈 集客（どこから）</a>
       <a data-target="panelKw" href="#">🔑 キーワード</a>
+      <a data-target="panelGscTotals" href="#">🔍 Google検索の状況</a>
       <a data-target="panelPages" href="#">📄 ページ別に見る</a>
       <a data-target="panelWho" href="#">👤 見ている人</a>
       <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
@@ -341,6 +378,49 @@
           <thead><tr><th>検索された言葉</th><th class="n">位置</th><th class="n">先週から</th><th class="n">表示回数</th></tr></thead>
           <tbody id="kwBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ========== Google検索（サーチコンソール）分析 ========== -->
+    <div class="group-head">
+      <span class="gh-icon">🔍</span>
+      <span class="gh-text">Google検索での状況<small>検索で、どう見つけてもらえているか（サーチコンソール）</small></span>
+      <span class="gh-line"></span>
+    </div>
+
+    <!-- ① 4つの大きな数字 -->
+    <div class="grid">
+      <div class="panel" id="panelGscTotals" style="grid-column:1 / -1">
+        <h3>Google検索での状況</h3>
+        <p class="sub">光製薬のサイトが、Google検索でどれくらい見られ、クリックされているかです。</p>
+        <div id="gscTotalsBox"></div>
+      </div>
+    </div>
+
+    <!-- ② 検索された言葉のランキング -->
+    <div class="grid">
+      <div class="panel" id="panelGscQueries" style="grid-column:1 / -1">
+        <h3>検索された言葉のランキング</h3>
+        <p class="sub">どんな言葉で検索した人に、光製薬のサイトが表示されているか（上位10件）。</p>
+        <div id="gscQueriesBox"></div>
+      </div>
+    </div>
+
+    <!-- ③ 改善できそうな検索キーワード -->
+    <div class="grid">
+      <div class="panel" id="panelGscChance" style="grid-column:1 / -1">
+        <h3>改善できそうな検索キーワード</h3>
+        <p class="sub">あと少しの工夫で、もっとクリックされそうな言葉を見つけました。</p>
+        <div id="gscChanceBox"></div>
+      </div>
+    </div>
+
+    <!-- ④ 検索で見つけてもらえているページ -->
+    <div class="grid">
+      <div class="panel" id="panelGscPages" style="grid-column:1 / -1">
+        <h3>検索で見つけてもらえているページ</h3>
+        <p class="sub">どのページが、Google検索から見つけられているかです。</p>
+        <div id="gscPagesBox"></div>
       </div>
     </div>
 
@@ -458,13 +538,21 @@
       <table class="gtable"><tbody id="glossaryBody"></tbody></table>
     </details>
 
-    <div class="actions" id="panelReport">
-      <button class="btn btn-accent" onclick="window.print()">この提案を印刷 / PDF保存</button>
-      <button class="btn btn-ghost" id="csvBtn">GA4のCSVを読み込む</button>
-      <input type="file" id="fileInput" accept=".csv" multiple style="display:none">
-      <button class="btn btn-ghost" id="resetBtn" style="display:none">サンプルに戻す</button>
+    <div class="data-load" id="panelReport">
+      <div class="dl-status" id="dataMode">● いまはサンプル表示中です（本物のデータではありません）</div>
+      <div class="dl-buttons">
+        <button class="btn-load btn-load-ga4" id="csvBtnGa4">📊 GA4のデータを読み込む</button>
+        <button class="btn-load btn-load-gsc" id="csvBtnGsc">🔍 Google検索のデータを読み込む</button>
+        <button class="btn-load btn-load-check" id="csvBtnCheck">📋 読み込んだデータを確認する</button>
+        <button class="btn-load btn-load-reset" id="resetBtn">↩ サンプル表示に戻す</button>
+      </div>
+      <input type="file" id="fileInputGa4" accept=".csv" multiple style="display:none">
+      <input type="file" id="fileInputGsc" accept=".csv" multiple style="display:none">
+      <div id="csvStatus"></div>
+      <div style="margin-top:14px">
+        <button class="btn btn-accent" onclick="window.print()">この提案を印刷 / PDF保存</button>
+      </div>
     </div>
-    <div id="csvStatus" style="margin-top:12px;font-size:13px;color:var(--ink-soft)"></div>
 
     <!-- データ更新のやり方ガイド -->
     <div class="guide" id="panelGuide">
@@ -520,24 +608,58 @@
         </div>
       </div>
 
-      <div class="gcard gc-todo">
-        <div class="gc-no">5</div>
+      <div class="guide-fin">
+        書き出した<b>4枚のCSV</b>を、上の「📊 GA4のデータを読み込む」ボタンでまとめて選べば完了です。<br>
+        <span style="color:var(--ink-soft);font-size:12.5px">※ GA4の画面はGoogleの仕様変更で名前や場所が変わることがあります。違っていたら、その画面を控えておいてください。</span>
+      </div>
+
+      <!-- サーチコンソール編 -->
+      <div class="guide-head" style="margin-top:28px">
+        <h3>🔍 Google検索のデータ（サーチコンソール）の取り方</h3>
+        <p>検索での表示回数・クリック・順位は、GA4ではなく「サーチコンソール」から取ります。</p>
+      </div>
+
+      <div class="guide-common">
+        <div class="gc-ttl">📌 まず知っておくこと</div>
+        <div style="font-size:13.5px;line-height:1.9">
+          サーチコンソールは、GA4とは<b>別のGoogleの無料サービス</b>です。GA4と連携していなくても、サーチコンソール自体にデータがあれば、そこからCSVを書き出せます。<br>
+          （ご利用には、サーチコンソールに光製薬サイトが登録されている必要があります）
+        </div>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">A</div>
         <div class="gc-body">
-          <div class="gc-name">検索の言葉（何と検索して来たか）　※ 今はまだ取得できません</div>
-          <div class="gc-do">このコーポレートサイトは、まだ Search Console（検索データ）とGA4がつながっていないため、この1枚は書き出せません。将来 Search Console を連携すると、メニューに「Search Console ▶ クエリ」が現れ、取得できるようになります。今は4枚だけで十分に動きます。</div>
+          <div class="gc-name">検索された言葉のデータ</div>
+          <div class="gc-path"><span class="ar">1.</span> search.google.com/search-console を開く <span class="ar">2.</span> 光製薬サイトを選ぶ <span class="ar">3.</span> 左メニュー「検索パフォーマンス」</div>
+          <div class="gc-do">→ 画面右上の<b>「エクスポート」→「CSV をダウンロード」</b>。「クエリ」タブの表が、検索された言葉のデータです。</div>
+          <div class="gc-tip">💡 期間は画面上部で変えられます。GA4と<b>同じ期間</b>にそろえるのがコツです</div>
+        </div>
+      </div>
+
+      <div class="gcard">
+        <div class="gc-no">B</div>
+        <div class="gc-body">
+          <div class="gc-name">検索で見つかっているページのデータ</div>
+          <div class="gc-path">同じ「検索パフォーマンス」の画面で <span class="ar">▶</span> 「ページ」タブに切り替え</div>
+          <div class="gc-do">→ 同じく<b>「エクスポート」→「CSV をダウンロード」</b>。どのページが検索から見つかっているかが分かります。</div>
         </div>
       </div>
 
       <div class="guide-fin">
-        書き出した<b>4枚のCSV</b>を、上の「GA4のCSVを読み込む」ボタンでまとめて選べば完了です。<br>
-        <span style="color:var(--ink-soft);font-size:12.5px">※ GA4の画面はGoogleの仕様変更で名前や場所が変わることがあります。違っていたら、その画面を控えておいてください。</span>
+        書き出したサーチコンソールのCSVは、上の<b>「🔍 Google検索のデータを読み込む」</b>ボタンから読み込んでください。<br>
+        <span style="color:var(--ink-soft);font-size:12.5px">※ サーチコンソールの画面も、Googleの仕様変更で名前や場所が変わることがあります。違っていたら教えてください。</span>
+      </div>
+
+      <div class="warn-box" style="margin-top:14px">
+        <b>読み込めたかの確認：</b>読み込み後、画面上部の表示が「● 実際のデータを表示中です」（緑）に変わり、下に「取得できた項目」が出れば成功です。「📋 読み込んだデータを確認する」ボタンで、いつでも一覧を確認できます。
       </div>
     </div>
 
 
     <footer>
       <p class="motto">考えるを、ひとりにしない。</p>
-      <p>Smile Plus Consulting ／ 光製薬さま サイト参謀ダッシュボード（サンプルデータ表示中）</p>
+      <p>Smile Plus Consulting ／ 光製薬さま サイト参謀ダッシュボード</p>
     </footer>
   </main>
 
@@ -561,7 +683,29 @@ const DATA={
     device:[["スマホ",58],["パソコン",36],["タブレット",6]],
     region:[["東京都",4100],["大阪府",1800],["神奈川県",1500],["愛知県",1100],["福岡県",720],["その他",3800]],
     internal:{sessions:1180,note:"IPアドレス除外分（社内ネットワーク）"},
-    contact:{name:"お問い合わせページ",views:356,before:["会社案内","サービス紹介"]}},
+    contact:{name:"お問い合わせページ",views:356,before:["会社案内","サービス紹介"]},
+    gsc:{
+      totals:{impressions:142000,clicks:5680,ctr:4.0,position:12.3},
+      queries:[
+        ["輸液ポンプ 選び方",18400,920,5.0,8.2],
+        ["光製薬",9200,3680,40.0,1.3],
+        ["輸液セット 種類",12600,504,4.0,6.5],
+        ["経静脈栄養 とは",8800,176,2.0,14.8],
+        ["高カロリー輸液 メーカー",7400,222,3.0,11.2],
+        ["輸液 製薬会社",6100,305,5.0,9.4],
+        ["点滴 種類 一覧",15200,152,1.0,18.6],
+        ["光製薬 製品",3200,960,30.0,2.1],
+        ["アミノ酸輸液",5600,112,2.0,16.3],
+        ["輸液療法 ガイドライン",4800,96,2.0,19.1]
+      ],
+      pages:[
+        ["/blog/infusion-guide",42000,1680,4.0,9.1],
+        ["/service/consulting",28000,1960,7.0,5.4],
+        ["/",19000,2280,12.0,3.2],
+        ["/case-studies",16500,495,3.0,12.7],
+        ["/price",9800,196,2.0,15.9]
+      ]
+    }},
   recruit:{label:"採用サイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","9,420","回",18.3,"ページビュー"],["訪問された回数","4,180","回",15.6,"セッション"],["応募・エントリー","47","件",27.0,"コンバージョン"],["検索結果での平均位置","12.1","位",-1.4,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -577,7 +721,22 @@ const DATA={
     device:[["スマホ",74],["パソコン",22],["タブレット",4]],
     region:[["東京都",1300],["大阪府",620],["神奈川県",540],["埼玉県",410],["千葉県",330],["その他",980]],
     internal:{sessions:340,note:"IPアドレス除外分（社内ネットワーク）"},
-    contact:{name:"エントリーページ",views:210,before:["募集要項","社員インタビュー"]}},
+    contact:{name:"エントリーページ",views:210,before:["募集要項","社員インタビュー"]},
+    gsc:{
+      totals:{impressions:38000,clicks:2280,ctr:6.0,position:9.8},
+      queries:[
+        ["光製薬 採用",8400,3360,40.0,2.1],
+        ["製薬 MR 未経験",6200,186,3.0,12.4],
+        ["光製薬 評判 社員",4800,288,6.0,7.3],
+        ["製薬会社 働きやすい",5600,112,2.0,15.8],
+        ["光製薬 新卒",3400,680,20.0,3.2]
+      ],
+      pages:[
+        ["/recruit/interview",14000,840,6.0,7.1],
+        ["/recruit/jobs",9200,552,6.0,8.4],
+        ["/recruit/message",6800,204,3.0,11.2]
+      ]
+    }},
   vision:{label:"ビジョンサイト",period:"2026/10/6 〜 2026/11/24 ・ 週次",
     kpi:[["ページが見られた回数","5,660","回",4.2,"ページビュー"],["訪問された回数","2,340","回",3.1,"セッション"],["資料請求・問い合わせ","19","件",-9.5,"コンバージョン"],["検索結果での平均位置","16.8","位",0.9,"平均掲載順位"]],
     trendLabels:["10/6","10/13","10/20","10/27","11/3","11/10","11/17","11/24"],
@@ -593,7 +752,22 @@ const DATA={
     device:[["パソコン",52],["スマホ",42],["タブレット",6]],
     region:[["東京都",720],["大阪府",340],["神奈川県",280],["兵庫県",190],["京都府",150],["その他",660]],
     internal:{sessions:520,note:"IPアドレス除外分（社内ネットワーク）"},
-    contact:{name:"資料請求ページ",views:88,before:["企業ビジョン","サステナビリティ"]}}
+    contact:{name:"資料請求ページ",views:88,before:["企業ビジョン","サステナビリティ"]},
+    gsc:{
+      totals:{impressions:21000,clicks:840,ctr:4.0,position:16.2},
+      queries:[
+        ["光製薬 企業理念",4200,840,20.0,3.4],
+        ["製薬 サステナビリティ",6800,136,2.0,18.9],
+        ["光製薬 研究開発",3600,216,6.0,8.7],
+        ["医薬品 社会貢献",5200,104,2.0,21.3],
+        ["光製薬 歴史",2400,288,12.0,5.1]
+      ],
+      pages:[
+        ["/vision/",9800,392,4.0,12.1],
+        ["/sustainability/",7200,144,2.0,17.8],
+        ["/rd/",4600,184,4.0,10.3]
+      ]
+    }}
 };
 
 const GLOSSARY=[["ページビュー","ページが見られた合計回数"],["セッション","サイトへの訪問回数"],["コンバージョン","成果（問い合わせ・応募・資料請求など）"],["平均掲載順位","検索結果に出たときの平均の位置（1に近いほど上位）"],["新規ユーザー","初めて来てくれた人"],["表示回数（インプレッション）","検索結果に表示された回数"],["オーガニック検索","検索から来た人（Google・Yahoo など）"],["ダイレクト","直接アクセス（お気に入り・URL直打ち）"],["リファラル","よそのサイトのリンク経由"]];
@@ -691,6 +865,15 @@ function buildAdvice(d, state, goal){
   }else if(state.key==="warn"){
     A.seo.unshift(S(`<b>掲載順位が落ちた言葉</b>を全て洗い出し、記事の再編集から着手しましょう。`,"要注意の状態では、守り（順位維持）が先です。"));
   }
+  // サーチコンソールのデータがあれば、掛け合わせ提案を優先的に追加
+  if(d.gsc && d.gsc.queries && d.gsc.queries.length){
+    // 例①：表示は多いがクリックされない言葉
+    const lowCtr=d.gsc.queries.filter(q=>q[1]>=1000 && q[3]<2.0).sort((a,b)=>b[1]-a[1])[0];
+    if(lowCtr) A.seo.unshift(S(`<b>「${lowCtr[0]}」は検索で${Number(lowCtr[1]).toLocaleString()}回表示されているのに、クリックは${lowCtr[3]}%</b>どまりです。ページの<b>タイトルと説明文</b>を、検索する人に伝わる言葉に見直しましょう。`,"表示されているのにクリックされない＝入口の看板（タイトル）で損をしています。直せばすぐ効きます。"));
+    // 例③：採用関連の検索が多い（採用系の言葉があれば）
+    const recruit=d.gsc.queries.find(q=>/採用|求人|新卒|中途|エントリー|働/.test(q[0]));
+    if(recruit && goal==="reach") A.reach.unshift(S(`検索で<b>「${recruit[0]}」</b>が見られています。採用への関心が高まっている兆しです。社員インタビューや仕事内容のページを充実させると、応募につながりやすくなります。`,"検索されている＝需要がある、ということ。そこに応える情報を増やすのが近道です。"));
+  }
   if(A.seo.length<3) A.seo.push(S(`月に1度、キーワードの順位変動をこの画面で定点観測しましょう。`,"続けて見ることで、小さな変化に早く気づけます。"));
   A.seo=A.seo.slice(0,3);
 
@@ -732,7 +915,7 @@ function render(site){
   }).join("");
 
   drawTrend(d);drawPages(d);drawSource(d);
-  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);drawContact(d);drawInternal(d);
+  drawMonthly(d);drawHours(d);drawWeekday(d);drawDevice(d);drawRegion(d);drawWorst(d);drawContact(d);drawInternal(d);drawGsc(d);
   renderStrategist(d);
   renderOverview();
 }
@@ -802,6 +985,65 @@ function drawRegion(d){destroy("rg");charts.rg=new Chart(document.getElementById
 function drawWorst(d){
   const note=v=>v<50?"ほぼ見られていません":v<90?"見直し候補":"少なめ";
   document.getElementById("worstBody").innerHTML=d.worst.map(([p,v])=>`<tr><td>${p}</td><td class="n">${v}</td><td style="color:var(--ink-soft);font-size:12px">${note(v)}</td></tr>`).join("");
+}
+
+/* ===== サーチコンソール描画 ===== */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function drawGsc(d){
+  const g=d.gsc;
+  const totalsBox=document.getElementById("gscTotalsBox");
+  const qBox=document.getElementById("gscQueriesBox");
+  const cBox=document.getElementById("gscChanceBox");
+  const pBox=document.getElementById("gscPagesBox");
+  if(!totalsBox) return;
+
+  // データが無い場合は「未取得」表示（架空の数字は出さない）
+  if(!g){
+    const na='<p style="color:var(--ink-soft);font-size:13.5px">Google検索（サーチコンソール）のデータは、まだ読み込まれていません。<br>「Google検索のデータを読み込む」ボタンから、サーチコンソールのCSVを読み込むと表示されます。</p>';
+    totalsBox.innerHTML=na; qBox.innerHTML=""; cBox.innerHTML=""; pBox.innerHTML="";
+    return;
+  }
+
+  // ① 4つの大きな数字
+  const t=g.totals;
+  totalsBox.innerHTML=`
+    <div class="gsc-kpis">
+      <div class="gsc-kpi"><div class="gk-label">検索結果に表示された回数</div><div class="gk-val">${Number(t.impressions).toLocaleString()}</div><div class="gk-sub">インプレッション</div></div>
+      <div class="gsc-kpi"><div class="gk-label">クリックされた回数</div><div class="gk-val">${Number(t.clicks).toLocaleString()}</div><div class="gk-sub">クリック数</div></div>
+      <div class="gsc-kpi"><div class="gk-label">クリックされた割合</div><div class="gk-val">${t.ctr}%</div><div class="gk-sub">CTR</div></div>
+      <div class="gsc-kpi"><div class="gk-label">検索での平均の位置</div><div class="gk-val">${t.position}位</div><div class="gk-sub">平均掲載順位</div></div>
+    </div>`;
+
+  // ② 検索ワードのランキング（上位10）
+  if(g.queries&&g.queries.length){
+    const rows=g.queries.slice(0,10).map(([w,imp,clk,ctr,pos])=>
+      `<tr><td>${escapeHtml(w)}</td><td class="n">${Number(imp).toLocaleString()}</td><td class="n">${Number(clk).toLocaleString()}</td><td class="n">${ctr}%</td><td class="n">${pos}位</td></tr>`).join("");
+    qBox.innerHTML=`<table><thead><tr><th>検索された言葉</th><th class="n">表示回数</th><th class="n">クリック</th><th class="n">クリック率</th><th class="n">平均順位</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }else{ qBox.innerHTML='<p style="color:var(--ink-soft);font-size:13px">検索ワードのデータがありません。</p>'; }
+
+  // ③ 改善できそうなキーワード
+  if(g.queries&&g.queries.length){
+    const chances=[];
+    g.queries.forEach(([w,imp,clk,ctr,pos])=>{
+      // 表示は多いがクリックされない（表示1000以上・CTR2%未満）
+      if(imp>=1000 && ctr<2.0) chances.push({w,why:`表示は${Number(imp).toLocaleString()}回と多いのに、クリックは${ctr}%どまり。<b>タイトルや説明文</b>を、検索する人に響く言葉に見直すと、クリックが増えやすい言葉です。`,sort:imp});
+      // あと一歩で上位（11〜20位）
+      else if(pos>=11 && pos<=20) chances.push({w,why:`現在${pos}位。<b>あと少しで検索1ページ目の上位</b>に届きます。この言葉を含む記事を加筆・更新すると、順位が上がりやすい状態です。`,sort:imp*0.8});
+    });
+    chances.sort((a,b)=>b.sort-a.sort);
+    if(chances.length){
+      cBox.innerHTML=chances.slice(0,5).map(c=>
+        `<div class="chance"><div class="ch-word">「${escapeHtml(c.w)}」</div><div class="ch-why">${c.why}</div></div>`).join("");
+    }else{ cBox.innerHTML='<p style="color:var(--ink-soft);font-size:13px">今のデータでは、特に目立つ改善候補は見つかりませんでした。良い状態です😊</p>'; }
+  }else{ cBox.innerHTML=""; }
+
+  // ④ 検索で見つかっているページ
+  if(g.pages&&g.pages.length){
+    const rows=g.pages.map(([u,imp,clk,ctr,pos])=>
+      `<tr><td class="url-cell">${escapeHtml(u)}</td><td class="n">${Number(imp).toLocaleString()}</td><td class="n">${Number(clk).toLocaleString()}</td><td class="n">${ctr}%</td><td class="n">${pos}位</td></tr>`).join("");
+    pBox.innerHTML=`<table><thead><tr><th>ページ</th><th class="n">表示回数</th><th class="n">クリック</th><th class="n">クリック率</th><th class="n">平均順位</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }else{ pBox.innerHTML='<p style="color:var(--ink-soft);font-size:13px">ページ別のデータがありません。</p>'; }
 }
 
 function drawContact(d){
@@ -880,29 +1122,181 @@ document.getElementById("goalSwitch").addEventListener("click",e=>{
    考え方：落としたCSVが何のレポートかを列名から自動判別し、
            いま表示中のサイトのデータに反映する
    ============================================================ */
-const fileInput=document.getElementById("fileInput");
 const csvStatus=document.getElementById("csvStatus");
-document.getElementById("csvBtn").onclick=()=>fileInput.click();
-document.getElementById("resetBtn").onclick=()=>location.reload();
+/* 読み込み済みファイルの記録（重複防止・履歴表示用） */
+let loadedFiles=[];       // {name, kind, items, when}
+let isLiveData=false;     // 実データモードか
 
-fileInput.onchange=e=>{
-  const files=[...e.target.files]; if(!files.length)return;
-  let done=0; const msgs=[];
+/* 実データモードに切り替え（サンプル表示をやめる） */
+function switchToLive(){
+  if(isLiveData) return;
+  isLiveData=true;
+  const m=document.getElementById("dataMode");
+  m.textContent="● 実際のデータを表示中です";
+  m.classList.add("live");
+}
+
+document.getElementById("csvBtnGa4").onclick=()=>document.getElementById("fileInputGa4").click();
+document.getElementById("csvBtnGsc").onclick=()=>document.getElementById("fileInputGsc").click();
+document.getElementById("csvBtnCheck").onclick=showLoadedData;
+document.getElementById("resetBtn").onclick=()=>{
+  if(confirm("サンプル表示に戻しますか？\n読み込んだデータは消えます（CSVファイル自体は消えません）。")) location.reload();
+};
+
+/* ファイル名の重複チェック */
+function isDuplicate(name){ return loadedFiles.some(f=>f.name===name); }
+
+/* 共通の読み込み処理（kind: "ga4" | "gsc"） */
+function handleFiles(files, kind){
+  if(!files.length) return;
+  let done=0; const results=[];
   files.forEach(f=>{
+    if(isDuplicate(f.name)){
+      results.push({name:f.name, ok:false, msg:"すでに読み込み済みです（二重集計を防ぐためスキップしました）"});
+      if(++done===files.length) finishLoad(results, kind);
+      return;
+    }
     const r=new FileReader();
     r.onload=ev=>{
-      const res=ingestCSV(ev.target.result);
-      msgs.push("・"+f.name+"："+res);
-      if(++done===files.length){
-        render(current);
-        document.getElementById("resetBtn").style.display="";
-        csvStatus.innerHTML="<b style='color:var(--brand)'>読み込み結果（"+DATA[current].label+"に反映）</b><br>"+msgs.join("<br>")
-          +"<br><span style='font-size:12px'>※ 反映されなかった項目は、対応するレポートのCSVを追加で読み込んでください。</span>";
+      let res;
+      if(kind==="gsc") res=ingestGscCSV(ev.target.result);
+      else res=ingestGa4CSV(ev.target.result);
+      if(res.ok){
+        loadedFiles.push({name:f.name, kind, items:res.items, period:res.period, when:new Date()});
       }
+      results.push({name:f.name, ...res});
+      if(++done===files.length) finishLoad(results, kind);
     };
+    r.onerror=()=>{ results.push({name:f.name, ok:false, msg:"ファイルを開けませんでした"}); if(++done===files.length) finishLoad(results, kind); };
     r.readAsText(f,"UTF-8");
   });
-};
+}
+
+function finishLoad(results, kind){
+  const anyOk=results.some(r=>r.ok);
+  if(anyOk) switchToLive();
+  render(current);
+  checkPeriodMismatch();
+  // 結果表示
+  const label=kind==="gsc"?"Google検索（サーチコンソール）":"GA4";
+  let html=`<div class="load-result ${anyOk?'ok':'ng'}"><div class="lr-ttl">${label}データの読み込み結果</div>`;
+  results.forEach(r=>{
+    if(r.ok){
+      html+=`<div class="lr-row">✅ <b>${escapeHtml(r.name)}</b><br>　取得できた項目：${r.items||"—"}`;
+      if(r.period) html+=`<br>　対象期間：${escapeHtml(r.period)}`;
+      html+=`</div>`;
+    }else{
+      html+=`<div class="lr-row">⚠️ <b>${escapeHtml(r.name)}</b><br>　${escapeHtml(r.msg)}</div>`;
+    }
+  });
+  html+=`<div class="lr-row" style="margin-top:8px;font-size:12px">更新日時：${new Date().toLocaleString("ja-JP")}</div></div>`;
+  csvStatus.innerHTML=html;
+}
+
+document.getElementById("fileInputGa4").onchange=e=>handleFiles([...e.target.files],"ga4");
+document.getElementById("fileInputGsc").onchange=e=>handleFiles([...e.target.files],"gsc");
+
+/* 「読み込んだデータを確認する」 */
+function showLoadedData(){
+  if(!loadedFiles.length){
+    csvStatus.innerHTML='<div class="load-result"><div class="lr-ttl">読み込み済みのデータ</div><div class="lr-row">まだ何も読み込まれていません。上のボタンからCSVを読み込んでください。</div></div>';
+    return;
+  }
+  let html='<div class="load-result ok"><div class="lr-ttl">読み込み済みのデータ（'+loadedFiles.length+'件）</div>';
+  loadedFiles.forEach(f=>{
+    const k=f.kind==="gsc"?"Google検索":"GA4";
+    html+=`<div class="lr-row">・[${k}] <b>${escapeHtml(f.name)}</b>${f.period?("　期間："+escapeHtml(f.period)):""}</div>`;
+  });
+  html+='</div>';
+  csvStatus.innerHTML=html;
+}
+
+/* 期間の食い違いチェック（違う期間のCSVが混ざっていたら警告） */
+function checkPeriodMismatch(){
+  const periods=loadedFiles.map(f=>f.period).filter(Boolean);
+  const uniq=[...new Set(periods)];
+  if(uniq.length>=2){
+    csvStatus.insertAdjacentHTML("beforeend",
+      `<div class="warn-box"><b>ご注意：</b>読み込んだCSVの対象期間が、いくつか異なっているようです（${uniq.map(escapeHtml).join(" / ")}）。<br>期間が違うデータは、無理に合算すると正しく比べられません。できるだけ<b>同じ期間</b>のCSVをそろえて読み込んでください。</div>`);
+  }
+}
+
+/* GA4 CSV（従来のingestCSVを呼び、結果を整形） */
+function ingestGa4CSV(text){
+  const msg=ingestCSV(text);
+  const ng=msg.includes("見つかりませんでした")||msg.includes("読み取れ");
+  return {ok:!ng, msg:ng?msg:"", items:ng?"":msg, period:extractPeriod(text)};
+}
+
+/* CSVから対象期間を取り出す（GA4/GSCのコメント行や日付列から推定） */
+function extractPeriod(text){
+  // GA4レポートCSVは先頭コメントに「# 開始日: ... 終了日: ...」等が入ることがある
+  const m=text.match(/(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})\D+(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/);
+  if(m) return m[1].replace(/-/g,"/")+" 〜 "+m[2].replace(/-/g,"/");
+  return "";
+}
+
+/* サーチコンソールCSVを解析して現在のサイトのgscに反映 */
+function ingestGscCSV(text){
+  const rows=parseCSV(text);
+  if(rows.length<2) return {ok:false, msg:"データが読み取れませんでした"};
+  const hi=rows.findIndex(r=>r.filter(x=>x!=="").length>=2);
+  if(hi<0) return {ok:false, msg:"表の見出しが見つかりませんでした"};
+  const header=rows[hi].map(h=>h.toLowerCase());
+  const body=rows.slice(hi+1).filter(r=>r.filter(x=>x!=="").length>=2);
+  const col=keys=>header.findIndex(h=>keys.some(k=>h.includes(k.toLowerCase())));
+
+  // サーチコンソールの列（日本語・英語 両対応）
+  const cQuery=col(["クエリ","query","検索キーワード"]);
+  const cPage =col(["ページ","page","url"]);
+  const cImp  =col(["表示回数","インプレッション","impressions","impression"]);
+  const cClk  =col(["クリック数","クリック","clicks","click"]);
+  const cCtr  =col(["ctr","クリック率"]);
+  const cPos  =col(["掲載順位","平均掲載順位","position","順位"]);
+  const num=(r,i)=>i>=0?toNum(r[i]):0;
+  const period=extractPeriod(text);
+
+  // サーチコンソールCSVかどうかの判定
+  // GA4のページCSV（ページ＋表示回数）と区別するため、GSC特有の列
+  // （クリック数・CTR・掲載順位 のいずれか）が必須。クエリ列があれば確実にGSC。
+  const hasGscSignal=(cClk>=0||cCtr>=0||cPos>=0);
+  const looksGsc=(cQuery>=0 && hasGscSignal) || (cImp>=0 && hasGscSignal);
+  if(!looksGsc) return {ok:false, msg:"サーチコンソールのCSVとして読み取れませんでした。GA4のデータの場合は『GA4のデータを読み込む』ボタンをお使いください。"};
+
+  const d=DATA[current];
+  if(!d.gsc) d.gsc={};
+  const parseRow=r=>{
+    const ctr=cCtr>=0?toNum(String(r[cCtr]).replace("%","")):(num(r,cImp)>0?Math.round(num(r,cClk)/num(r,cImp)*1000)/10:0);
+    return [num(r,cImp),num(r,cClk),ctr,cPos>=0?Math.round(num(r,cPos)*10)/10:0];
+  };
+
+  let items=[];
+  // クエリ別
+  if(cQuery>=0){
+    const arr=body.map(r=>[r[cQuery],...parseRow(r)]).filter(x=>x[0]);
+    arr.sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.gsc.queries=arr.slice(0,50); items.push("検索ワード"); }
+  }
+  // ページ別
+  if(cPage>=0){
+    const arr=body.map(r=>[r[cPage],...parseRow(r)]).filter(x=>x[0]);
+    arr.sort((a,b)=>b[1]-a[1]);
+    if(arr.length){ d.gsc.pages=arr.slice(0,20); items.push("検索流入ページ"); }
+  }
+  // 合計（クエリ/ページどちらかから集計）
+  const src=d.gsc.queries||d.gsc.pages;
+  if(src&&src.length){
+    const imp=src.reduce((a,b)=>a+b[1],0);
+    const clk=src.reduce((a,b)=>a+b[2],0);
+    const ctr=imp>0?Math.round(clk/imp*1000)/10:0;
+    const pos=Math.round(src.reduce((a,b)=>a+b[4],0)/src.length*10)/10;
+    d.gsc.totals={impressions:imp,clicks:clk,ctr,position:pos};
+    items.unshift("検索の合計（表示・クリック・順位）");
+  }
+  if(!items.length) return {ok:false, msg:"対応する項目が見つかりませんでした"};
+  if(period) d.gsc.period=period;
+  return {ok:true, msg:"", items:items.join("、"), period};
+}
 
 /* CSVを解析して、現在のサイトDATAに反映。戻り値は結果メッセージ */
 function ingestCSV(text){
