@@ -1520,6 +1520,14 @@ document.getElementById("periodSelect").addEventListener("change",function(){
   if(text){
     try{localStorage.setItem("hikari_period",text);}catch(e){}
     document.getElementById("period").textContent="▼ "+text;
+    // 案内の一言（数字は自動では変わらないことを伝える）
+    const noteArea=document.getElementById("csvStatus");
+    if(noteArea){
+      noteArea.innerHTML=`<div class="warn-box">表示する期間を<b>「${escapeHtml(text)}」</b>にしました。<br>
+      これは<b>期間の表示（名札）を変えただけ</b>です。グラフや数字は、今読み込んでいるデータのままです。<br>
+      この期間の数字を表示するには、GA4（やサーチコンソール）で<b>同じ期間のCSVを書き出して、読み込んで</b>ください。</div>`;
+      noteArea.scrollIntoView({behavior:"smooth",block:"center"});
+    }
   }
 });
 
