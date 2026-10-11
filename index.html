@@ -153,6 +153,14 @@
   .cover-foot{margin-top:20px;font-size:12.5px;font-weight:700;opacity:.9;text-align:right}
   @media(max-width:720px){.cover-title{font-size:24px}.cover-how{grid-template-columns:1fr}}
 
+  /* かんたん一括ドロップエリア */
+  .dropzone{border:2.5px dashed var(--brand-line);border-radius:14px;background:var(--brand-soft);
+    padding:28px 24px;text-align:center;transition:.15s;margin-bottom:4px}
+  .dropzone.dragover{border-color:var(--brand);background:#dceaf6;transform:scale(1.01)}
+  .dropzone .dz-icon{font-size:40px;line-height:1}
+  .dropzone .dz-main{font-size:16px;font-weight:800;color:var(--brand-deep);margin-top:10px}
+  .dropzone .dz-sub{font-size:12.5px;color:var(--ink-soft);margin-top:8px;line-height:1.8}
+
   /* データ読み込みエリア */
   .data-load{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;box-shadow:var(--shadow)}
   .dl-status{font-size:14px;font-weight:800;padding:10px 16px;border-radius:10px;margin-bottom:16px;background:var(--gold);color:#fff}
@@ -311,7 +319,7 @@
       <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
       <a data-target="panelInternal" href="#">🏢 社内アクセス</a>
       <a data-target="panelReport" href="#">📊 月次レポート</a>
-      <a data-target="panelGuide" href="#">📝 データ更新のやり方</a>
+      <a data-target="panelGuide" href="#">📝 かんたん使い方ガイド</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
   </aside>
@@ -590,12 +598,29 @@
 
     <div class="data-load" id="panelReport">
       <div class="dl-status" id="dataMode">● いまはサンプル表示中です（本物のデータではありません）</div>
-      <div class="dl-buttons">
-        <button class="btn-load btn-load-ga4" id="csvBtnGa4">📊 GA4のデータを読み込む</button>
-        <button class="btn-load btn-load-gsc" id="csvBtnGsc">🔍 Google検索のデータを読み込む</button>
+
+      <!-- かんたん一括読み込み（フォルダ/ファイルをまとめてドラッグ） -->
+      <div class="dropzone" id="dropzone">
+        <div class="dz-icon">📁</div>
+        <div class="dz-main">CSVファイル（またはフォルダ）を、ここにまとめてドラッグ</div>
+        <div class="dz-sub">GA4と検索（サーチコンソール）が混ざっていても、自動で見分けて振り分けます。<br>何枚でも、一度にまとめて大丈夫です。</div>
+        <button class="btn-load btn-load-ga4" id="dzPick" style="margin-top:14px;flex:none;min-width:auto;padding:12px 28px">ファイルを選ぶ</button>
+        <input type="file" id="fileInputPick" accept=".csv" multiple style="display:none">
+      </div>
+
+      <details style="margin-top:14px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--ink-soft);font-weight:700">▸ 種類を指定して読み込む（くわしい方向け）</summary>
+        <div class="dl-buttons" style="margin-top:12px">
+          <button class="btn-load btn-load-ga4" id="csvBtnGa4">📊 GA4のデータだけ読み込む</button>
+          <button class="btn-load btn-load-gsc" id="csvBtnGsc">🔍 Google検索のデータだけ読み込む</button>
+        </div>
+      </details>
+
+      <div class="dl-buttons" style="margin-top:14px">
         <button class="btn-load btn-load-check" id="csvBtnCheck">📋 読み込んだデータを確認する</button>
         <button class="btn-load btn-load-reset" id="resetBtn">↩ サンプル表示に戻す</button>
       </div>
+
       <input type="file" id="fileInputGa4" accept=".csv" multiple style="display:none">
       <input type="file" id="fileInputGsc" accept=".csv" multiple style="display:none">
       <div id="csvStatus"></div>
@@ -604,10 +629,10 @@
       </div>
     </div>
 
-    <!-- データ更新のやり方ガイド -->
+    <!-- かんたん使い方ガイド -->
     <div class="guide" id="panelGuide">
       <div class="guide-head">
-        <h3>📝 データ更新のやり方（月に1回・約5分）</h3>
+        <h3>📝 かんたん使い方ガイド（最新データの入れ方・月に1回・約5分）</h3>
         <p>GA4から4枚のCSVを書き出して、上の「GA4のCSVを読み込む」ボタンで取り込むだけです。</p>
       </div>
 
@@ -1297,6 +1322,88 @@ function finishLoad(results, kind){
 
 document.getElementById("fileInputGa4").onchange=e=>handleFiles([...e.target.files],"ga4");
 document.getElementById("fileInputGsc").onchange=e=>handleFiles([...e.target.files],"gsc");
+
+/* 種類を自動判別して一括読み込み（GA4か検索かをアプリが見分ける） */
+function handleFilesAuto(files){
+  // CSVだけに絞る（フォルダドラッグで他のファイルが混ざっても安全に）
+  files=files.filter(f=>/\.csv$/i.test(f.name));
+  if(!files.length){
+    csvStatus.innerHTML='<div class="load-result ng"><div class="lr-row">CSVファイルが見つかりませんでした。GA4や検索から書き出した .csv ファイルを選んでください。</div></div>';
+    return;
+  }
+  let done=0; const results=[];
+  files.forEach(f=>{
+    if(isDuplicate(f.name)){
+      results.push({name:f.name, ok:false, kind:"", msg:"すでに読み込み済みです（二重集計を防ぐためスキップしました）"});
+      if(++done===files.length) finishLoadAuto(results);
+      return;
+    }
+    const r=new FileReader();
+    r.onload=ev=>{
+      const text=ev.target.result;
+      // まず検索（サーチコンソール）として試し、ダメならGA4として試す
+      let res=ingestGscCSV(text); let kind="gsc";
+      if(!res.ok){ res=ingestGa4CSV(text); kind="ga4"; }
+      if(res.ok){
+        loadedFiles.push({name:f.name, kind, items:res.items, period:res.period, when:new Date()});
+      }
+      results.push({name:f.name, kind, ...res});
+      if(++done===files.length) finishLoadAuto(results);
+    };
+    r.onerror=()=>{ results.push({name:f.name, ok:false, kind:"", msg:"ファイルを開けませんでした"}); if(++done===files.length) finishLoadAuto(results); };
+    r.readAsText(f,"UTF-8");
+  });
+}
+
+function finishLoadAuto(results){
+  const anyOk=results.some(r=>r.ok);
+  if(anyOk) switchToLive();
+  render(current);
+  checkPeriodMismatch();
+  const kindName=k=>k==="gsc"?"[Google検索]":k==="ga4"?"[GA4]":"";
+  let html=`<div class="load-result ${anyOk?'ok':'ng'}"><div class="lr-ttl">読み込み結果（${results.length}件）</div>`;
+  results.forEach(r=>{
+    if(r.ok){
+      html+=`<div class="lr-row">✅ ${kindName(r.kind)} <b>${escapeHtml(r.name)}</b><br>　取得できた項目：${r.items||"—"}`;
+      if(r.period) html+=`<br>　対象期間：${escapeHtml(r.period)}`;
+      html+=`</div>`;
+    }else{
+      html+=`<div class="lr-row">⚠️ <b>${escapeHtml(r.name)}</b><br>　${escapeHtml(r.msg)}</div>`;
+    }
+  });
+  html+=`<div class="lr-row" style="margin-top:8px;font-size:12px">更新日時：${new Date().toLocaleString("ja-JP")}</div></div>`;
+  csvStatus.innerHTML=html;
+}
+
+/* ドロップエリアの配線 */
+const dropzone=document.getElementById("dropzone");
+const fileInputPick=document.getElementById("fileInputPick");
+document.getElementById("dzPick").onclick=()=>fileInputPick.click();
+fileInputPick.onchange=e=>handleFilesAuto([...e.target.files]);
+
+["dragenter","dragover"].forEach(ev=>dropzone.addEventListener(ev,e=>{
+  e.preventDefault(); e.stopPropagation(); dropzone.classList.add("dragover");
+}));
+["dragleave","drop"].forEach(ev=>dropzone.addEventListener(ev,e=>{
+  e.preventDefault(); e.stopPropagation(); dropzone.classList.remove("dragover");
+}));
+dropzone.addEventListener("drop",e=>{
+  const items=e.dataTransfer.items;
+  // フォルダdrop対応：webkitGetAsEntryでフォルダ内を再帰的に集める
+  if(items && items.length && items[0].webkitGetAsEntry){
+    const files=[]; let pending=0; let started=false;
+    const done=()=>{ if(started && pending===0) handleFilesAuto(files); };
+    const walk=entry=>{
+      if(entry.isFile){ pending++; entry.file(f=>{ files.push(f); pending--; done(); }); }
+      else if(entry.isDirectory){ const rd=entry.createReader(); rd.readEntries(ents=>{ ents.forEach(walk); done(); }); }
+    };
+    for(const it of items){ const en=it.webkitGetAsEntry&&it.webkitGetAsEntry(); if(en){ started=true; walk(en); } }
+    // フォルダAPIが使えない場合のフォールバック
+    if(!started && e.dataTransfer.files.length) handleFilesAuto([...e.dataTransfer.files]);
+  }else{
+    handleFilesAuto([...e.dataTransfer.files]);
+  }
+});
 
 /* 「読み込んだデータを確認する」 */
 function showLoadedData(){
