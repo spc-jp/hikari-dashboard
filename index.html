@@ -292,11 +292,27 @@
   .flash{animation:flashglow 1.4s ease-out}
 
   @media print{
-    .side,.actions,details.glossary,.tabs,.goal-switch{display:none!important}
-    .cover{break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .cover-title{color:#fff}
+    /* どの印刷でも共通で隠すもの（操作系） */
+    .side,.bigtabs,.goal-switch,.data-load,details.glossary,.period-select,.period-edit{display:none!important}
     body{background:#fff}.main{padding:0}
-    .panel,.kpi,.strategist,.overview{box-shadow:none;break-inside:avoid}
+    .panel,.kpi,.strategist,.pgdetail,.gsc-kpi,.gcard{box-shadow:none;break-inside:avoid}
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+
+    /* 【分析を印刷モード】body.print-analysis のとき：使い方ガイドを隠し、両タブの中身を全部出す */
+    body.print-analysis #panelGuide{display:none!important}
+    body.print-analysis .view-group{display:block!important}  /* 隠れていたタブも印刷する */
+    body.print-analysis .cover{break-after:page}
+    body.print-analysis .cover-title{color:#fff}
+
+    /* 【ガイドを印刷モード】body.print-guide のとき：ガイド以外を全部隠す */
+    body.print-guide .cover,
+    body.print-guide .kpis,
+    body.print-guide .topbar,
+    body.print-guide .bigtabs,
+    body.print-guide .view-group,
+    body.print-guide .group-head,
+    body.print-guide .strategist{display:none!important}
+    body.print-guide #panelGuide{display:block!important;box-shadow:none;border:none}
   }
 </style>
 </head>
@@ -625,7 +641,8 @@
       <input type="file" id="fileInputGsc" accept=".csv" multiple style="display:none">
       <div id="csvStatus"></div>
       <div style="margin-top:14px">
-        <button class="btn btn-accent" onclick="window.print()">この提案を印刷 / PDF保存</button>
+        <button class="btn btn-accent" id="printAnalysis">📊 分析結果をPDF保存 / 印刷</button>
+        <button class="btn btn-ghost" id="printGuide" style="margin-left:10px">📝 使い方ガイドをPDF保存 / 印刷</button>
       </div>
     </div>
 
@@ -1726,6 +1743,19 @@ document.getElementById("bigtabs").addEventListener("click",e=>{
 });
 
 /* ロゴ：クリックで先頭に戻る */
+/* 印刷：分析結果 / 使い方ガイド（印刷モードをbodyに付けて印刷→解除） */
+function printWith(mode){
+  document.body.classList.add(mode);
+  // 印刷後にモードを外す
+  const cleanup=()=>{ document.body.classList.remove(mode); window.removeEventListener("afterprint",cleanup); };
+  window.addEventListener("afterprint",cleanup);
+  // 念のためのフォールバック（afterprintが来ない環境向け）
+  setTimeout(cleanup, 1500);
+  window.print();
+}
+document.getElementById("printAnalysis").addEventListener("click",()=>printWith("print-analysis"));
+document.getElementById("printGuide").addEventListener("click",()=>printWith("print-guide"));
+
 document.getElementById("logoHome").addEventListener("click",()=>{
   window.scrollTo({top:0,behavior:"smooth"});
   document.querySelectorAll(".nav a").forEach(x=>x.classList.remove("active"));
