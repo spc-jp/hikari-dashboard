@@ -328,6 +328,8 @@
 
 .side{overflow-y:auto}.nav-label{font-size:11px;font-weight:800;color:var(--brand-deep);padding:16px 16px 5px}.nav a{padding-left:16px;padding-right:12px;font-size:12.5px}.start-here{padding:20px 22px;margin-bottom:20px;background:#fff;border:2px solid var(--brand-line);border-left:5px solid var(--accent);border-radius:14px}.start-here h3{color:var(--brand-deep);font-size:17px}.start-here p{font-size:13px;margin:8px 0}.start-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.data-tag{font-size:12px;font-weight:700;color:var(--gold);margin:8px 0}.result-tip{scroll-margin-top:110px}.panel{scroll-margin-top:110px}
 @media(max-width:900px){.side{overflow-y:visible}.nav-label{width:100%;padding-top:10px}.nav{width:100%}}@media print{.start-here{display:none!important}}
+
+#panelGuide,#panelReport,#panelDemo{scroll-margin-top:24px}body:has(#demoBanner:not([hidden])) #panelGuide,body:has(#demoBanner:not([hidden])) #panelReport,body:has(#demoBanner:not([hidden])) #panelDemo{scroll-margin-top:140px}
 </style>
 </head>
 <body>
@@ -338,24 +340,24 @@
       <span class="logo-text">光製薬<small>SITE 参謀 DASHBOARD</small></span>
     </div>
     <nav class="nav">
-      <a class="active" data-target="top" href="#">🏠 全体を見る</a>
+      <a class="active" data-target="top" href="#cover">🏠 全体を見る</a>
       <div class="nav-label">使い方・データ読み込み</div>
-      <a data-target="panelGuide" href="#">📝 かんたん使い方ガイド</a>
-      <a data-target="panelReport" href="#">📥 CSVを読み込む・確認する</a>
-      <a data-target="panelDemo" href="#">🧪 サンプルで体験してみる</a>
+      <a data-target="panelGuide" href="#panelGuide">📝 かんたん使い方ガイド</a>
+      <a data-target="panelReport" href="#panelReport">📥 CSVを読み込む・確認する</a>
+      <a data-target="panelDemo" href="#panelDemo">🧪 サンプルで体験してみる</a>
       <div class="nav-label">結果を見る（ガイドと同じ番号）</div>
-      <a data-target="panelPages" href="#">① よく見られているページ</a>
-      <a data-target="panelSource" href="#">② 訪問の入口</a>
-      <a data-target="panelDevice" href="#">③ スマホ・パソコンの割合</a>
-      <a data-target="panelRegion" href="#">④ 訪問者の地域</a>
-      <a data-target="panelGscTotals" href="#">⑤ Google検索の状況</a>
+      <a data-target="panelPages" href="#panelPages">① よく見られているページ</a>
+      <a data-target="panelSource" href="#panelSource">② 訪問の入口</a>
+      <a data-target="panelDevice" href="#panelDevice">③ スマホ・パソコンの割合</a>
+      <a data-target="panelRegion" href="#panelRegion">④ 訪問者の地域</a>
+      <a data-target="panelGscTotals" href="#panelGscTotals">⑤ Google検索の状況</a>
       <div class="nav-label">さらに詳しく見る</div>
-      <a data-target="panelPageDetail" href="#">🔎 ページごとの詳しい分析</a>
-      <a data-target="panelWorst" href="#">📄 あまり見られていないページ</a>
-      <a data-target="panelKw" href="#">🔑 キーワードの順位</a>
-      <a data-target="panelContact" href="#">✉️ 問い合わせの道のり</a>
-      <a data-target="panelTime" href="#">🕒 時間帯・曜日</a>
-      <a data-target="panelInternal" href="#">🏢 社内アクセス</a>
+      <a data-target="panelPageDetail" href="#panelPageDetail">🔎 ページごとの詳しい分析</a>
+      <a data-target="panelWorst" href="#panelWorst">📄 あまり見られていないページ</a>
+      <a data-target="panelKw" href="#panelKw">🔑 キーワードの順位</a>
+      <a data-target="panelContact" href="#panelContact">✉️ 問い合わせの道のり</a>
+      <a data-target="panelTime" href="#panelTime">🕒 時間帯・曜日</a>
+      <a data-target="panelInternal" href="#panelInternal">🏢 社内アクセス</a>
     </nav>
     <div class="note">数字を読んで、課題を見つけ、目的に応じた次の一手までご提案します。</div>
   </aside>
@@ -1904,7 +1906,7 @@ document.querySelector(".nav").addEventListener("click",e=>{
   }
   // タブ切替直後はレイアウトが変わるので、少し待ってスクロール
   setTimeout(()=>{
-    el.scrollIntoView({behavior:"smooth",block:"center"});
+    el.scrollIntoView({behavior:"smooth",block:"start"});
     el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
   }, 60);
 });
