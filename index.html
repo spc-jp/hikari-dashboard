@@ -333,6 +333,10 @@
 
 .purpose-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.purpose-card{padding:18px;border:1px solid var(--brand-line);border-radius:12px;background:var(--brand-soft)}.purpose-card h4{font-size:16px;color:var(--brand-deep)}.purpose-card p{font-size:13px;line-height:1.8;margin:8px 0}.purpose-card small{font-size:11.5px;color:var(--ink-soft)}.purpose-card .btn{font-size:12.5px;padding:9px 12px}.purpose-actions{display:flex;gap:8px;flex-wrap:wrap}.plain-steps{padding-left:22px;margin:10px 0;font-size:13px;line-height:1.9}.next-action{margin-top:10px;border-top:1px solid var(--brand-line);padding-top:10px;font-size:13px}.guide-purpose{font-size:16px;font-weight:800;color:var(--brand-deep);margin:8px 0}.guide-start-note{font-size:13px;background:#fff4e0;border-radius:10px;padding:14px;margin:12px 0}.purpose-card,.gcard{scroll-margin-top:24px}
 @media(max-width:720px){.purpose-grid{grid-template-columns:1fr}}
+
+.use-start{background:#fff;border:2px solid var(--brand-line);border-radius:16px;padding:24px;margin-bottom:20px;scroll-margin-top:24px}.use-start h2{font-size:22px;color:var(--brand-deep);line-height:1.5}.use-start>.intro{margin:8px 0 18px;font-size:14px;color:var(--ink-soft)}.use-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.use-step{padding:16px;background:var(--brand-soft);border-radius:12px;font-size:13px}.use-step small{display:block;font-weight:800;color:var(--brand-deep);margin-bottom:6px}.use-step b{display:block;font-size:15px}.use-step p{margin-top:8px;line-height:1.8}.first-action{background:#fff4e0;border-radius:12px;padding:16px;margin-top:16px;font-size:14px}.first-action .btn{margin:10px 8px 0 0}.purpose-card.chosen{border:2px solid var(--brand);background:#fff}.purpose-focus{background:var(--brand-soft);border-radius:10px;padding:12px 16px;margin-top:16px;font-size:13px}.purpose-focus[hidden]{display:none}
+@media(max-width:900px){.use-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.use-steps{grid-template-columns:1fr}.use-start{padding:18px}.use-start h2{font-size:19px}}
+@media print{.use-start{display:none!important}}
 </style>
 </head>
 <body>
@@ -343,7 +347,8 @@
       <span class="logo-text">光製薬<small>SITE 参謀 DASHBOARD</small></span>
     </div>
     <nav class="nav">
-      <a class="active" data-target="purposeStart" href="#purposeStart">🏠 知りたいことから選ぶ</a>
+      <a class="active" data-target="useStart" href="#useStart">🏠 はじめに・使う順番</a>
+      <a data-target="purposeStart" href="#purposeStart">🎯 知りたいことから選ぶ</a>
       <div class="nav-label">使い方・データ読み込み</div>
       <a data-target="panelGuide" href="#panelGuide">📝 かんたん使い方ガイド</a>
       <a data-target="panelReport" href="#panelReport">📥 CSVを読み込む・確認する</a>
@@ -368,7 +373,19 @@
   <main class="main">
     <div class="demo-banner" id="demoBanner" hidden role="status" aria-live="polite"><p><strong id="demoBannerTitle"></strong><br><span id="demoHint"></span></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" id="demoChooseAgain">別のサンプルを選ぶ</button><button class="btn btn-main" id="demoExit">体験を終了</button></div></div>
 
-    <section class="start-here" id="purposeStart" aria-labelledby="startTitle"><h3 id="startTitle">まず、知りたいことを選んでください</h3><p>GA4やサーチコンソールの操作に慣れていなくても大丈夫。<b>知りたいこと → データの取り方 → 結果の読み方 → 次の行動</b>の順に案内します。</p><p>初めての方は「どのページに関心が集まっている？」から始めてみましょう。</p><div class="purpose-grid"><article class="purpose-card"><h4>どのページに関心が集まっている？</h4><small>① よく見られているページ</small><p>お客様がよく見ている内容と、届けたいページが読まれているかを確認できます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide1">データの取り方を見る</button><button class="btn btn-ghost" data-result-target="panelPages">1の結果を見る</button></div></article><article class="purpose-card"><h4>お客様はどこから来ている？</h4><small>② 訪問の入口</small><p>検索・SNS・直接アクセスなど、訪問のきっかけがわかります。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide2">データの取り方を見る</button><button class="btn btn-ghost" data-result-target="panelSource">2の結果を見る</button></div></article><article class="purpose-card"><h4>スマホで見やすくするべき？</h4><small>③ スマホ・パソコンの割合</small><p>どの機器で見られているかがわかり、使いやすさを確認する順番を決められます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide3">データの取り方を見る</button><button class="btn btn-ghost" data-result-target="panelDevice">3の結果を見る</button></div></article><article class="purpose-card"><h4>届けたい地域の人に見られている？</h4><small>④ 訪問者の地域</small><p>訪問者の地域の内訳を、参考情報として確認できます。個人の住所がわかるものではありません。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide4">データの取り方を見る</button><button class="btn btn-ghost" data-result-target="panelRegion">4の結果を見る</button></div></article><article class="purpose-card"><h4>どんな言葉で検索されている？</h4><small>⑤ Google検索の状況</small><p>検索された言葉・表示回数・クリック数・順位から、見つけてもらう入口を確認できます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide5">データの取り方を見る</button><button class="btn btn-ghost" data-result-target="panelGscTotals">5の結果を見る</button></div></article><article class="purpose-card"><h4>見られているのに、問い合わせが少ない？</h4><small>詳しい分析：問い合わせの道のり</small><p>問い合わせページへの到達と、成果の数字を確認します。到達回数と問い合わせ完了件数は別の数字です。</p><div class="purpose-actions"><button class="btn btn-main" data-section-target="panelContact">問い合わせの道のりを見る</button><button class="btn btn-ghost" data-purpose-guide="guide1">必要なページデータの取り方</button></div><p style="font-size:12px">完了件数の確認には、GA4で問い合わせ完了の計測設定と、そのデータが必要です。</p></article></div><div class="guide-start-note"><b>データの準備がまだですか？</b> サンプルで、数字の読み方と改善のヒントを体験できます。<button class="btn btn-ghost" data-demo-start style="margin:8px 0">サンプルで体験してみる</button><br>CSVは分析用のデータファイルです。未読み込みの項目にはサンプルの数字が表示されます。</div></section>
+    <section class="use-start" id="useStart" aria-labelledby="useTitle">
+<h2 id="useTitle">サイトの数字を、次の行動につなげましょう。</h2>
+<p class="intro">難しい分析画面を読み解く必要はありません。知りたいことを選ぶと、データの取り方から結果の読み方まで案内します。</p>
+<div class="use-steps" aria-label="使い方の順番">
+<div class="use-step"><small>STEP 1</small><b>知りたいことを選ぶ</b><p>下の質問から１つ選びます。<br>例：「どのページに関心が集まっている？」</p></div>
+<div class="use-step"><small>STEP 2</small><b>データの取り方を見る</b><p>「データの取り方を見る」を押し、案内に沿ってGoogleからファイルを保存します。</p></div>
+<div class="use-step"><small>STEP 3</small><b>CSVを読み込む</b><p>「CSVを読み込む」を押し、保存したファイルを選びます。CSVは分析用のデータファイルです。</p></div>
+<div class="use-step"><small>STEP 4</small><b>結果と、次の行動を見る</b><p>読み込み完了後の「結果を見る」を押します。「見るポイント」と「次の行動」を確認します。</p></div>
+</div>
+<div class="first-action"><b>まずは、下の質問から１つ選んでください。</b><br>全部のデータをそろえる必要はありません。１つずつ確認できます。<br><button class="btn btn-main" data-section-target="purposeStart">知りたいことを選ぶ</button><button class="btn btn-ghost" data-demo-start>データなしでサンプル体験</button><p style="font-size:12px;margin-top:10px">まだデータがない方はサンプル体験から。サンプルは架空の数字です。</p></div>
+<div class="purpose-focus" id="purposeFocus" hidden role="status" aria-live="polite"></div>
+</section>
+<section class="start-here" id="purposeStart" aria-labelledby="startTitle"><h3 id="startTitle">まず、知りたいことを選んでください</h3><p>GA4やサーチコンソールの操作に慣れていなくても大丈夫。<b>知りたいこと → データの取り方 → 結果の読み方 → 次の行動</b>の順に案内します。</p><p>初めての方は「どのページに関心が集まっている？」から始めてみましょう。</p><div class="purpose-grid"><article class="purpose-card"><h4>どのページに関心が集まっている？</h4><small>① よく見られているページ</small><p>お客様がよく見ている内容と、届けたいページが読まれているかを確認できます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide1">データの取り方を見る →</button><button class="btn btn-ghost" data-result-target="panelPages">1の結果を見る →</button></div></article><article class="purpose-card"><h4>お客様はどこから来ている？</h4><small>② 訪問の入口</small><p>検索・SNS・直接アクセスなど、訪問のきっかけがわかります。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide2">データの取り方を見る →</button><button class="btn btn-ghost" data-result-target="panelSource">2の結果を見る →</button></div></article><article class="purpose-card"><h4>スマホで見やすくするべき？</h4><small>③ スマホ・パソコンの割合</small><p>どの機器で見られているかがわかり、使いやすさを確認する順番を決められます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide3">データの取り方を見る →</button><button class="btn btn-ghost" data-result-target="panelDevice">3の結果を見る →</button></div></article><article class="purpose-card"><h4>届けたい地域の人に見られている？</h4><small>④ 訪問者の地域</small><p>訪問者の地域の内訳を、参考情報として確認できます。個人の住所がわかるものではありません。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide4">データの取り方を見る →</button><button class="btn btn-ghost" data-result-target="panelRegion">4の結果を見る →</button></div></article><article class="purpose-card"><h4>どんな言葉で検索されている？</h4><small>⑤ Google検索の状況</small><p>検索された言葉・表示回数・クリック数・順位から、見つけてもらう入口を確認できます。</p><div class="purpose-actions"><button class="btn btn-main" data-purpose-guide="guide5">データの取り方を見る →</button><button class="btn btn-ghost" data-result-target="panelGscTotals">5の結果を見る →</button></div></article><article class="purpose-card"><h4>見られているのに、問い合わせが少ない？</h4><small>詳しい分析：問い合わせの道のり</small><p>問い合わせページへの到達と、成果の数字を確認します。到達回数と問い合わせ完了件数は別の数字です。</p><div class="purpose-actions"><button class="btn btn-main" data-section-target="panelContact">問い合わせの道のりを見る</button><button class="btn btn-ghost" data-purpose-guide="guide1">必要なページデータの取り方</button></div><p style="font-size:12px">完了件数の確認には、GA4で問い合わせ完了の計測設定と、そのデータが必要です。</p></article></div><div class="guide-start-note"><b>データの準備がまだですか？</b> サンプルで、数字の読み方と改善のヒントを体験できます。<button class="btn btn-ghost" data-demo-start style="margin:8px 0">サンプルで体験してみる</button><br>CSVは分析用のデータファイルです。未読み込みの項目にはサンプルの数字が表示されます。</div></section>
     <!-- 提案用カバー（印刷時は1ページ目） -->
     <section class="cover" id="cover">
       <div class="cover-inner">
@@ -694,7 +711,7 @@
         <div class="gc-body">
           <div class="gc-name">① よく見られているページ</div><div class="guide-purpose">どのページに関心が集まっている？</div><p style="font-size:13px">お客様がよく見ている内容と、届けたいページが読まれているかを確認できます。</p>
           <div class="gc-path">レポート <span class="ar">▶</span> エンゲージメント <span class="ar">▶</span> ページとスクリーン</div>
-          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ページとスクリーン」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「1の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelPages" style="margin-top:10px">①の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>一番見られているページは？ → 関心が集まっている内容を探します。</li><li>商品紹介など、届けたいページは見られている？ → 閲覧回数を確認します。</li><li>人気ページに問い合わせや関連ページの案内はある？ → 実際のサイトを開いて確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>人気ページに、問い合わせや関連ページへの案内があるか、実際のサイトを開いて確認しましょう。</div>
+          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ページとスクリーン」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「1の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelPages" style="margin-top:10px">①の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>一番見られているページは？ → 関心が集まっている内容を探します。</li><li>商品紹介など、届けたいページは見られている？ → 閲覧回数を確認します。</li><li>人気ページに問い合わせや関連ページの案内はある？ → 実際のサイトを開いて確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>人気ページに、問い合わせや関連ページへの案内があるか、実際のサイトを開いて確認しましょう。</div>
         </div>
       </div>
 
@@ -704,7 +721,7 @@
           <div class="gc-name">② 訪問の入口</div><div class="guide-purpose">お客様はどこから来ている？</div><p style="font-size:13px">検索・SNS・直接アクセスなど、訪問のきっかけがわかります。</p>
           <div class="gc-path">レポート <span class="ar">▶</span> トラフィック獲得</div>
           <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div>
-          <div class="gc-tip">💡「集客」ではなく「トラフィック獲得」です</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「トラフィック獲得」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「2の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelSource" style="margin-top:10px">②の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>検索・直接アクセス・SNSのうち、どこから来ていますか？</li><li>１つの入口に偏っていませんか？ → 他の入口を育てるヒントになります。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>多い入口で発信を続け、少ない入口を１つ育てることを検討しましょう。</div>
+          <div class="gc-tip">💡「集客」ではなく「トラフィック獲得」です</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「トラフィック獲得」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「2の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelSource" style="margin-top:10px">②の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>検索・直接アクセス・SNSのうち、どこから来ていますか？</li><li>１つの入口に偏っていませんか？ → 他の入口を育てるヒントになります。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>多い入口で発信を続け、少ない入口を１つ育てることを検討しましょう。</div>
         </div>
       </div>
 
@@ -714,7 +731,7 @@
           <div class="gc-name">③ スマホ・パソコンの割合</div><div class="guide-purpose">スマホで見やすくするべき？</div><p style="font-size:13px">どの機器で見られているかがわかり、使いやすさを確認する順番を決められます。</p>
           <div class="gc-path">レポート <span class="ar">▶</span> ユーザー <span class="ar">▶</span> テクノロジー <span class="ar">▶</span> ユーザーの環境の詳細</div>
           <div class="gc-do">→ 表の左上の「ブラウザ ▼」を押して、<b>「デバイス カテゴリ」に変えてから</b>書き出し</div>
-          <div class="gc-tip">💡「ユーザー属性の詳細」と名前が似ているので注意。欲しいのは「テクノロジー」の中です</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ユーザーの環境の詳細（デバイス カテゴリ）」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「3の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelDevice" style="margin-top:10px">③の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>スマホとパソコン、どちらが多いですか？</li><li>多く使われる機器で実際のサイトを開き、文字やボタンの使いやすさを確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>多く使われる機器でサイトを開き、文字の大きさ・ボタン・問い合わせの入力を確認しましょう。</div>
+          <div class="gc-tip">💡「ユーザー属性の詳細」と名前が似ているので注意。欲しいのは「テクノロジー」の中です</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ユーザーの環境の詳細（デバイス カテゴリ）」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「3の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelDevice" style="margin-top:10px">③の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>スマホとパソコン、どちらが多いですか？</li><li>多く使われる機器で実際のサイトを開き、文字やボタンの使いやすさを確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>多く使われる機器でサイトを開き、文字の大きさ・ボタン・問い合わせの入力を確認しましょう。</div>
         </div>
       </div>
 
@@ -723,7 +740,7 @@
         <div class="gc-body">
           <div class="gc-name">④ 訪問者の地域</div><div class="guide-purpose">届けたい地域の人に見られている？</div><p style="font-size:13px">訪問者の地域の内訳を、参考情報として確認できます。個人の住所がわかるものではありません。</p>
           <div class="gc-path">レポート <span class="ar">▶</span> ユーザー <span class="ar">▶</span> ユーザー属性 <span class="ar">▶</span> ユーザー属性の詳細</div>
-          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ユーザー属性の詳細」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「4の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelRegion" style="margin-top:10px">④の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>届けたい地域から見られていますか？</li><li>地域は推定値です。参考情報として確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>届けたい地域に役立つ情報や事例が、サイトにあるか確認しましょう。地域だけで施策の良し悪しを決めないようにします。</div>
+          <div class="gc-do">→ 開いたら、そのまま3ステップで書き出し</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleアナリティクス（GA4）の「ユーザー属性の詳細」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「4の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGA4のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelRegion" style="margin-top:10px">④の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>届けたい地域から見られていますか？</li><li>地域は推定値です。参考情報として確認します。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>届けたい地域に役立つ情報や事例が、サイトにあるか確認しましょう。地域だけで施策の良し悪しを決めないようにします。</div>
         </div>
       </div>
 
@@ -752,7 +769,7 @@
           <div class="gc-name">⑤ Google検索の状況｜検索された言葉</div><div class="guide-purpose">どんな言葉で検索されている？</div><p style="font-size:13px">検索された言葉・表示回数・クリック数・順位から、見つけてもらう入口を確認できます。</p>
           <div class="gc-path"><span class="ar">1.</span> search.google.com/search-console を開く <span class="ar">2.</span> 光製薬サイトを選ぶ <span class="ar">3.</span> 左メニュー「検索パフォーマンス」</div>
           <div class="gc-do">→ 画面右上の<b>「エクスポート」→「CSV をダウンロード」</b>。「クエリ」タブの表が、検索された言葉のデータです。</div>
-          <div class="gc-tip">💡 期間は画面上部で変えられます。GA4と<b>同じ期間</b>にそろえるのがコツです</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleサーチコンソールの「検索パフォーマンス／検索結果」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「5の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGoogle検索のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelGscTotals" style="margin-top:10px">⑤の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>どんな言葉で検索されていますか？</li><li>表示されるのにクリックされない言葉は？ → タイトルや説明文を見直す候補です。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>表示が多くクリックが少ない言葉から、ページのタイトルと説明文を見直しましょう。検索順位だけで判断せず、検索する人の目的も確認します。</div>
+          <div class="gc-tip">💡 期間は画面上部で変えられます。GA4と<b>同じ期間</b>にそろえるのがコツです</div><div class="guide-next"><ol class="plain-steps"><li>下の案内を見て、Googleサーチコンソールの「検索パフォーマンス／検索結果」からCSVファイルをダウンロードします。</li><li>「CSVを読み込む」を押し、ダウンロードしたファイルを選びます。</li><li>読み込み完了後、「5の結果を見る」を押します。</li></ol><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGoogle検索のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelGscTotals" style="margin-top:10px">⑤の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>どんな言葉で検索されていますか？</li><li>表示されるのにクリックされない言葉は？ → タイトルや説明文を見直す候補です。</li></ul></div><div class="next-action"><b>次に何をする？</b><br>表示が多くクリックが少ない言葉から、ページのタイトルと説明文を見直しましょう。検索順位だけで判断せず、検索する人の目的も確認します。</div>
         </div>
       </div>
 
@@ -761,7 +778,7 @@
         <div class="gc-body">
           <div class="gc-name">⑤ Google検索の状況｜検索で見つかるページ</div><div class="guide-purpose">どのページが検索から見つかっている？</div><p style="font-size:13px">検索から訪問されるページを確認して、情報を充実させる候補を探します。</p>
           <div class="gc-path">同じ「検索パフォーマンス」の画面で <span class="ar">▶</span> 「ページ」タブに切り替え</div>
-          <div class="gc-do">→ 同じく<b>「エクスポート」→「CSV をダウンロード」</b>。どのページが検索から見つかっているかが分かります。</div><div class="guide-next"><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGoogle検索のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelGscTotals" style="margin-top:10px">⑤の結果を見る</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>どのページが検索から見つかっていますか？</li><li>表示回数とクリック数を見て、入口として活躍するページを探します。</li></ul></div>
+          <div class="gc-do">→ 同じく<b>「エクスポート」→「CSV をダウンロード」</b>。どのページが検索から見つかっているかが分かります。</div><div class="guide-next"><b>CSVを保存したら</b><br><button type="button" class="btn btn-ghost" data-load-start style="margin:8px 0">CSVを読み込む</button><br>上のボタンで、保存したGoogle検索のCSVを選んでください。<br><button type="button" class="btn btn-main" data-result-target="panelGscTotals" style="margin-top:10px">⑤の結果を見る →</button><p style="margin-top:10px"><b>見るポイント</b></p><ul><li>どのページが検索から見つかっていますか？</li><li>表示回数とクリック数を見て、入口として活躍するページを探します。</li></ul></div>
         </div>
       </div>
 
@@ -1390,7 +1407,12 @@ function goToResult(id){
 }
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-result-target]');if(b){goToResult(b.dataset.resultTarget);return;}
- const guide=e.target.closest('[data-purpose-guide]');if(guide){setNavSelection('panelGuide');const el=document.getElementById(guide.dataset.purposeGuide);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return;}
+ const guide=e.target.closest('[data-purpose-guide]');if(guide){
+ document.querySelectorAll('.purpose-card').forEach(card=>card.classList.remove('chosen'));
+ const card=guide.closest('.purpose-card');if(card)card.classList.add('chosen');
+ const focus=document.getElementById('purposeFocus');focus.hidden=false;
+ focus.textContent='選んだ目的：'+(card?card.querySelector('h4').textContent:'ページの閲覧状況を確認する')+'。次は、移動先の手順に沿ってファイルを保存し、「CSVを読み込む」を押してください。';
+ setNavSelection('panelGuide');const el=document.getElementById(guide.dataset.purposeGuide);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return;}
  const section=e.target.closest('[data-section-target]');if(section){navigateSection(section.dataset.sectionTarget);return;}
  if(e.target.closest('[data-load-start]')){document.getElementById('fileInputPick').click();navigateSection('panelReport');return;}
  if(e.target.closest('[data-guide-start]'))navigateSection('panelGuide');
@@ -1884,7 +1906,7 @@ document.getElementById("printGuide").addEventListener("click",()=>printWith("pr
 document.getElementById("logoHome").addEventListener("click",()=>{
   window.scrollTo({top:0,behavior:"smooth"});
   document.querySelectorAll(".nav a").forEach(x=>x.classList.remove("active"));
-  const home=document.querySelector('.nav a[data-target="top"]');
+  const home=document.querySelector('.nav a[data-target="useStart"]');
   if(home) home.classList.add("active");
 });
 
